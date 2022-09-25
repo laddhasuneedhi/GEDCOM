@@ -13,7 +13,7 @@
 0 NOTE define grandma
 0 @I06@ INDI
 1 NAME Darcie /Dasilva/
-2 BIRT
+1 BIRT
 2 DATE 16 Dec 1961
 1 SEX F
 1 FAMS @F02@

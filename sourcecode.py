@@ -35,7 +35,9 @@ x.field_names = ["ID", "Name", "Gender", "Birthday", "Age", "Alive", "Death", "C
 y.field_names = ["ID", "Married", "Divorced", "Husband ID", "Husband Name", "Wife ID", "Wife Name", "Children"]
 
 # define variables for table x 
-tbl_id = None; tbl_name = None; tbl_gend = None; tbl_birt = None; tbl_age = None; tbl_aliv = None; tbl_deat = None; tbl_chil = None; tbl_spou = None
+tbl_id = "N/A"; tbl_name = "N/A"; tbl_gend = "N/A"; tbl_birt = "N/A"; tbl_age = "N/A"; tbl_aliv = "N/A"; tbl_deat = "N/A"; tbl_chil = "N/A"; tbl_spou = "N/A"
+birfday = 0
+deafday = 0
 
 # define variables for table y
 
@@ -80,9 +82,13 @@ for line in f:
                 print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
                 if (tag == "NAME"): tbl_name = line[i+1:]
                 if (tag == "SEX"): tbl_gend = line[i+1:]
+                if (tag == "BIRT"): birfday = 1
+                if (tag == "DEAT"): deafday = 1
             elif (line[0] == "2") and (tag in tag2):
                 print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
-                #if (tag == "DEAT"): tbl_alive = "he need some milk"
+                if (tag == "DATE"): 
+                    if (birfday == 1): tbl_birt = line[i+1:]; birfday = 0
+                    if (deafday == 1): tbl_deat = line[i+1:]; deafday = 0; tbl_aliv = False
             else:
                 #raise ValueError('Invalid level with the tag: <' + tag + '>')
                 print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
@@ -97,16 +103,18 @@ for line in f:
                         print("<-- " + line[0] + "|" + tag + "|Y|" + line[2:i+1])
                         if (tag == "INDI"):
                             # check if we've been here before and write-out then clear previous table data if we have
-                            if (tbl_id != None):
+                            if (tbl_id != "N/A"):
                                 print (red + "Next Customer!" + white)
                                 x.add_row([tbl_id, tbl_name, tbl_gend, tbl_birt, tbl_age, tbl_aliv, tbl_deat, tbl_chil, tbl_spou])
-                                tbl_id = None; tbl_name = None; tbl_gend = None; tbl_birt = None; tbl_age = None; tbl_aliv = None; tbl_deat = None; tbl_chil = None; tbl_spou = None
+                                tbl_id = "N/A"; tbl_name = "N/A"; tbl_gend = "N/A"; tbl_birt = "N/A"; tbl_age = "N/A"; tbl_aliv = "N/A"; tbl_deat = "N/A"; tbl_chil = "N/A"; tbl_spou = "N/A"
                                 tbl_id = line[2:i+1]
-                            elif (tbl_id == None):
+                                tbl_aliv = True
+                            elif (tbl_id == "N/A"):
                                 tbl_id = line[2:i+1]
+                                tbl_aliv = True
                         if (line[2:i+1] == "FAM"):
                             # reset table y from 0 terminater
-                            tbl_id = None;
+                            tbl_id = "N/A"
                     else:
                         #raise ValueError('Invalid level with the tag: <' + tag + '>')
                         print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
