@@ -6,7 +6,6 @@ I pledge my honor that i have abided by the stevens honor system
 
 '''
 from prettytable import PrettyTable
-x = PrettyTable()
 import sys
 import os
 
@@ -19,9 +18,9 @@ arg_1 = sys.argv[1] #input filename
 
 currpath = os.getcwd()
 print(currpath)
-outputpath = str(currpath) + "\\outputP2.txt"
+outputpath = str(currpath) + "\\outputP2.txt"   #gets path for output file
 
-# """
+"""
 def answer():
     '''takes file and transforms it'''
     level0a = ['NOTE', 'HEAD', 'TRLR']
