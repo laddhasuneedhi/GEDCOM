@@ -8,7 +8,7 @@ I pledge my honor that i have abided by the stevens honor system
 from prettytable import PrettyTable
 x = PrettyTable()
 import sys
-
+import os
 
 if len(sys.argv) == 1:
 	print ("\nPlease provide input filename as the first argument and try again.\n")
@@ -17,6 +17,11 @@ if len(sys.argv) == 1:
 arg_0 = sys.argv[0] #python sourcefile
 arg_1 = sys.argv[1] #input filename
 
+currpath = os.getcwd()
+print(currpath)
+outputpath = str(currpath) + "\\outputP2.txt"
+
+# """
 def answer():
     '''takes file and transforms it'''
     level0a = ['NOTE', 'HEAD', 'TRLR']
@@ -25,8 +30,10 @@ def answer():
 
     # file = open("/Users/alielsayed/Fall '22/CS555/CS555 GEDCOM2 Ali_E/CS555 M1B1 Project1GEDCOM", 'r')
     file = open(arg_1, 'r')
+
     for line in file:
         # with open("/Users/alielsayed/Fall '22/CS555/CS555 GEDCOM2 Ali_E/outputP2.txt", "a") as f:
+        with open(outputpath, 'a') as f:
             print(' ', file =f)
             print('--> ' + line, file =f) #print line
             slots = line.split()
@@ -58,6 +65,7 @@ def answer():
                     lineOne = tag + '|N|' + arguments
                 answerOne = newLine + lineOne
                 print(answerOne, file =f)
-        
 
 answer()
+
+# """

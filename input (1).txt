@@ -1,0 +1,23 @@
+0 NOTE Hao Dian Li
+0 NOTE I pledge my honors that I have abided by the Stevens Honor System.
+0 NOTE starting generation
+0 NOTE define grandpa
+0 @I05@ INDI
+1 NAME Owen /Ramsley/
+1 BIRT
+2 DATE 04 Jul 1960
+1 SEX M
+1 FAMS @F02@
+0 NOTE define grandma
+0 @I06@ INDI
+1 NAME Darcie /Dasilva/
+2 BIRT
+2 DATE 16 Dec 1961
+1 SEX F
+1 FAMS @F02@
+1 DEAT
+2 DATE 25 Mar 2022
+0 NOTE next generation of an imaginary family
+2 NOTES this shouldn't be here!
+0 NOTE Marriage test
+0 NOTE
