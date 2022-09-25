@@ -93,7 +93,7 @@ for line in f:
                 #raise ValueError('Invalid level with the tag: <' + tag + '>')
                 print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
 
-        else: #second token is not a valid tag, we look at third token
+        else: #second token is not a valid tag, we look at third token :)
             
             tag = line[i+1:]
 
