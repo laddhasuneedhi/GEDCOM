@@ -15,6 +15,7 @@ extag = ["INDI", "FAM"]
 singletag = ["MARR", "DIV"]
 validlevels = ["0", "1", "2"]
 
+
 if len(sys.argv) == 1:
 	print ("\nPlease provide input filename as the first argument and try again.\n")
 	quit()
@@ -38,6 +39,9 @@ y.field_names = ["ID", "Married", "Divorced", "Husband ID", "Husband Name", "Wif
 # define variables for table x 
 tbl_id = "N/A"; tbl_name = "N/A"; tbl_gend = "N/A"; tbl_birt = "N/A"; tbl_age = "N/A"; tbl_aliv = "N/A"; tbl_deat = "N/A"; tbl_chil = "N/A"; tbl_spou = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today()
+f_id = "N/A"; f_married = "N/A" ; f_div = "N/A"; f_husbid = "N/A"; f_husbname = "N/A"; f_wifeid = "N/A"; f_wifename = "N/A"; f_chil = "N/A";
+name_list = []
+id_list = []
 
 # define variables for table y
 
@@ -80,12 +84,28 @@ for line in f:
                 print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
             elif (line[0] == "1") and (tag in tag1):
                 # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
-                if (tag == "NAME"): tbl_name = line[i+1:]
+                if (tag == "NAME"): 
+                    tbl_name = line[i+1:]
+                    name_list.append(tbl_name)
+                    id_list.append(tbl_id)
+                   
+                    
+                    
                 if (tag == "SEX"): tbl_gend = line[i+1:]
                 if (tag == "BIRT"): birfday = 1
                 if (tag == "DEAT"): deafday = 1
                 if (tag == "FAMC"): tbl_chil = "'" + line[i+1:] + "'"
                 if (tag == "FAMS"): tbl_spou = "'" + line[i+1:] + "'"
+                if (tag == "WIFE"):
+                  print(id_list)
+                  m =line.split(" ")[2]
+                  f_wifeid = m
+                  f_wifename = name_list[id_list.index(m)]
+                if (tag == "HUSB"):
+                      m =line.split(" ")[2]
+                      f_husbid = m
+                      f_husbname = name_list[id_list.index(m)]
+                   
 
             elif (line[0] == "2") and (tag in tag2):
                 # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
@@ -116,14 +136,24 @@ for line in f:
                                     tbl_age = int(death_split[2]) - int(birth_split[2])
                                 x.add_row([tbl_id, tbl_name, tbl_gend, tbl_birt, tbl_age, tbl_aliv, tbl_deat, tbl_chil, tbl_spou])
                                 tbl_id = "N/A"; tbl_name = "N/A"; tbl_gend = "N/A"; tbl_birt = "N/A"; tbl_age = "N/A"; tbl_aliv = "N/A"; tbl_deat = "N/A"; tbl_chil = "N/A"; tbl_spou = "N/A"
-                                tbl_id = line[2:i+1]
+                                tbl_id = line.split(" ")[1]
                                 tbl_aliv = True
                             elif (tbl_id == "N/A"):
-                                tbl_id = line[2:i+1]
+                                tbl_id = line.split(" ")[1]
                                 tbl_aliv = True
-                        if (line[2:i+1] == "FAM"):
-                            # reset table y from 0 terminater
-                            tbl_id = "N/A"
+                        if (line.split(" ")[2] == "FAM"):
+                            print("hu")
+                            if(f_id != "N/A"):
+                                    y.add_row([f_id, f_married,f_div, f_husbid, f_husbname, f_wifeid,f_wifename, f_chil ])
+                                    f_id = line.split(" ")[1]
+                                    f_married = "N/A"; f_div = "N/A"; f_husbid = "N/A"; f_husbname = "N/A"; f_wifeid = "N/A"; f_wifename = "N/A"; f_chil = "N/A"
+                            else:
+                                 f_id = line.split(" ")[1]
+                         # reset table y from 0 terminater
+                        
+                            
+                                
+                        
                     else:
                         #raise ValueError('Invalid level with the tag: <' + tag + '>')
                         print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
@@ -153,6 +183,7 @@ elif tbl_aliv == False:
 x.add_row([tbl_id, tbl_name, tbl_gend, tbl_birt, tbl_age, tbl_aliv, tbl_deat, tbl_chil, tbl_spou])
 # y.add_row([bla,bla])
 print(x)
+print(y)
 
 
 f.close()
