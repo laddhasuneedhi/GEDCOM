@@ -2,8 +2,7 @@
 #Hao Dian Li
 
 import sys
-import os #Hack to make colors work in Windows cmd 1/2
-os.system('color') #Hack to make colors work in Windows cmd 2/2
+import os
 from prettytable import PrettyTable
 from datetime import date
 
@@ -15,20 +14,9 @@ extag = ["INDI", "FAM"]
 singletag = ["MARR", "DIV"]
 validlevels = ["0", "1", "2"]
 
-if len(sys.argv) == 1:
-	print ("\nPlease provide input filename as the first argument and try again.\n")
-	quit()
-	
-arg_0 = sys.argv[0]
-arg_1 = sys.argv[1]
 
-# Color definitions
-dark_red = "\033[0;31m"
-red = "\033[0;91m"
-white = "\033[0;37m"
-
-f = open(arg_1, 'r')
-print ("Analyzing: " + str(sys.argv))
+f = open("input.txt", 'r')
+print ("Analyzing: " + "input.text")
 
 x = PrettyTable()
 y = PrettyTable()
@@ -131,7 +119,7 @@ for line in f:
                     #raise ValueError('Only tags valid for this format: ' + extag)
                     print("Only tags valid for this format: " + extag)
             else: #no valid tag provided
-                print("<-- " + level + "|" + line[a+1:i] + "|" + red + "N" + white + "|" + tag)
+                print("<-- " + level + "|" + line[a+1:i] + "|" +  "N" +  "|" + tag)
 
     else:
         if ogline[0] == '\n':
