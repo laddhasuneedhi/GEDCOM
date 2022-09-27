@@ -29,7 +29,7 @@ red = "\033[0;91m"
 white = "\033[0;37m"
 
 f = open(arg_1, 'r')
-print ("Analyzing: " + str(sys.argv))
+# print ("Analyzing: " + str(sys.argv))
 
 x = PrettyTable()
 y = PrettyTable()
@@ -55,21 +55,21 @@ for line in f:
     #input
     if level in validlevels:
         line = line.strip('\n')
-        print("--> " + line)
+        # print("--> " + line)
 
     #output
         i = a+1
         linelen = (len(ogline))
         while ogline[i] != " " and ogline[i] != '\n': #identify last index of second token
             if a+1+i > linelen:
-                if line[a+1:i+1] in validtags: #second token is a valid tag
-                    if (level == "1") and (line[a+1:i+1] in singletag):
-                        if line[a+1:i+1] == "NAME": print("<-- " + level + "|" + line[a+1:i+1] + "|Y|")
-                    else:
-                        #raise ValueError('Invalid level with the tag: <' + line[a+1:i+1] + '>')
-                        print("Invalid level: <" + level + "> with the tag: <" + line[a+1:i+1] + ">")
-                else:
-                    print("<-- " + level + "|" + line[a+1:i+1] + "|N|")
+                # if line[a+1:i+1] in validtags: #second token is a valid tag
+                #     if (level == "1") and (line[a+1:i+1] in singletag):
+                #         if line[a+1:i+1] == "NAME": print("<-- " + level + "|" + line[a+1:i+1] + "|Y|")
+                #     else:
+                #         #raise ValueError('Invalid level with the tag: <' + line[a+1:i+1] + '>')
+                #         print("Invalid level: <" + level + "> with the tag: <" + line[a+1:i+1] + ">")
+                # else:
+                #     print("<-- " + level + "|" + line[a+1:i+1] + "|N|")
                 quit()
             else:
                 i+=1
@@ -77,9 +77,11 @@ for line in f:
 
         if tag in validtags: #second token is a valid tag
 
-            if (line[0] == "0") and (tag in tag0):
-                print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
-            elif (line[0] == "1") and (tag in tag1):
+            # if (line[0] == "0") and (tag in tag0):
+            #     print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
+            # elif (line[0] == "1") and (tag in tag1):
+            if (line[0] == "1") and (tag in tag1):
+
                 # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
                 if (tag == "NAME"): 
                     tblx_name = line[i+1:]
@@ -113,9 +115,9 @@ for line in f:
 
                     if (marfday == 1): tbly_marr = line[i+1:]; marfday = 0
                     if (divfday == 1): tbly_divo = line[i+1:]; divfday = 0
-            else:
+            # else:
                 #raise ValueError('Invalid level with the tag: <' + tag + '>')
-                print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
+                # print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
 
         else: #second token is not a valid tag, we look at third token :)
             
@@ -124,7 +126,7 @@ for line in f:
             if tag in validtags:
                 if tag in extag: #INDI, FAM only
                     if (line[0] == "0"):
-                        print("<-- " + line[0] + "|" + tag + "|Y|" + line[2:i+1])
+                        # print("<-- " + line[0] + "|" + tag + "|Y|" + line[2:i+1])
                         if (tag == "INDI"):
                             # check if we've been here before and write-out then clear previous table data if we have
                             if (tblx_id != "N/A"):
@@ -152,23 +154,23 @@ for line in f:
                                 tbly_id = line[2:i+1]
                             elif (tbly_id == "N/A"):
                                 tbly_id = line[2:i+1]
-                    else:
+                    # else:
                         #raise ValueError('Invalid level with the tag: <' + tag + '>')
-                        print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
-                else:
+                        # print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
+                # else:
                     #raise ValueError('Only tags valid for this format: ' + extag)
-                    print("Only tags valid for this format: " + extag)
-            else: #no valid tag provided
-                print("<-- " + level + "|" + line[a+1:i] + "|" + red + "N" + white + "|" + tag)
+                    # print("Only tags valid for this format: " + extag)
+            # else: #no valid tag provided
+                # print("<-- " + level + "|" + line[a+1:i] + "|" + red + "N" + white + "|" + tag)
 
     else:
         if ogline[0] == '\n':
             line = line.strip('\n')
-        else:
-            line = line.strip('\n')
-            print("--> " + line)
-            #raise ValueError('Invalid level: <' + level + '>')
-            print("Invalid level: <" + level + ">")
+        # else:
+        #     line = line.strip('\n')
+        #     print("--> " + line)
+        #     #raise ValueError('Invalid level: <' + level + '>')
+        #     print("Invalid level: <" + level + ">")
 # """
 
 #this is INDI table
