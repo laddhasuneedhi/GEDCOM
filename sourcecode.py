@@ -40,8 +40,7 @@ y.field_names = ["ID", "Married", "Divorced", "Husband ID", "Husband Name", "Wif
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
-
-# define variables for table y
+name_list = []; id_list = []
 
 # """
 for line in f:
@@ -82,7 +81,11 @@ for line in f:
                 print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
             elif (line[0] == "1") and (tag in tag1):
                 # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
-                if (tag == "NAME"): tblx_name = line[i+1:]
+                if (tag == "NAME"): 
+                    tblx_name = line[i+1:]
+                    name_list.append(tblx_name)
+                    id_list.append(tblx_id)
+
                 if (tag == "SEX"): tblx_gend = line[i+1:]
                 if (tag == "BIRT"): birfday = 1
                 if (tag == "DEAT"): deafday = 1
@@ -92,20 +95,15 @@ for line in f:
                 if (tag == "MARR"): marfday = 1
                 if (tag == "DIV"): divfday = 1
                 if (tag == "CHIL"): tbly_carr.append(line[i+1:]); tbly_chil = tbly_carr
-                # if (tag == "HUSB"): 
-                #     tbly_husi = line[i+1:]
-                #     row = x[0]
-                #     col = x[0]
-                #     col = col.get_string(fields = [tbly_husi])
-                #     print(col)
-                #     row.border = False; row.header = False
-                #     name_lookup = row.get_string(fields = ["Name"])
-                #     tbly_husn = name_lookup
+                if (tag == "HUSB"): 
+                    m = line[i+1:].rstrip()
+                    tbly_husi = m
+                    tbly_husn = name_list[id_list.index(m)]               
 
-                # if (tag == "WIFE"): 
-                #     tbly_wifi = line[i+1:]
-                #     # tbly_wifn = 
-
+                if (tag == "WIFE"): 
+                    m = line[i+1:].rstrip()
+                    tbly_wifi = m
+                    tbly_wifn = name_list[id_list.index(m)]
 
             elif (line[0] == "2") and (tag in tag2):
                 # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
@@ -141,10 +139,10 @@ for line in f:
                                     
                                 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
                                 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"; tblx_carr = []; tblx_sarr = []
-                                tblx_id = line[2:i+1]
+                                tblx_id = line[2:i+1].rstrip()
                                 tblx_aliv = True
                             elif (tblx_id == "N/A"):
-                                tblx_id = line[2:i+1]
+                                tblx_id = line[2:i+1].rstrip()
                                 tblx_aliv = True
                         if (tag == "FAM"):
                             # reset table y from 0 terminater
@@ -190,11 +188,5 @@ print("Individuals")
 print(x.get_string(sortby = "ID"))
 print("Families")
 print(y.get_string(sortby = "ID"))
-
-# print(x.get_string(fields=["ID", "Name"]))
-# nlrow = 0
-# while nlrow < 1000:
-#     print(x[nlrow].get_string(fields=["Name"]))
-#     nlrow += 1
 
 f.close()
