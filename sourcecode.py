@@ -1,11 +1,8 @@
 #I pledge my honor that I have abided by the Stevens Honors System.
 # https://github.com/laddhasuneedhi/Project02.git
-#Hao Dian Li, Suneedhi Laddha, Ali El Sayed,Gigi Luna
+#Hao Dian Li, Suneedhi Laddha, Ali El Sayed, Gigi Luna
 
-from platform import java_ver
 import sys
-import os #Hack to make colors work in Windows cmd 1/2
-os.system('color') #Hack to make colors work in Windows cmd 2/2
 from prettytable import PrettyTable
 from datetime import date
 
@@ -14,9 +11,8 @@ tag0 = ["INDI", "FAM", "HEAD", "TRLR", "NOTE"]
 tag1 = ["NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "MARR", "HUSB", "WIFE", "CHIL", "DIV"]
 tag2 = ["DATE"]
 extag = ["INDI", "FAM"]
-singletag = ["MARR", "DIV"]
+singletag = ["BIRT", "MARR", "DIV"]
 validlevels = ["0", "1", "2"]
-
 
 if len(sys.argv) == 1:
 	print ("\nPlease provide input filename as the first argument and try again.\n")
@@ -25,238 +21,139 @@ if len(sys.argv) == 1:
 arg_0 = sys.argv[0]
 arg_1 = sys.argv[1]
 
-# Color definitions
-dark_red = "\033[0;31m"
-red = "\033[0;91m"
-white = "\033[0;37m"
-
 f = open(arg_1, 'r')
-# print ("Analyzing: " + str(sys.argv))
 
 x = PrettyTable()
 y = PrettyTable()
 x.field_names = ["ID", "Name", "Gender", "Birthday", "Age", "Alive", "Death", "Child", "Spouse"]
 y.field_names = ["ID", "Married", "Divorced", "Husband ID", "Husband Name", "Wife ID", "Wife Name", "Children"]
 
-# define variables for table x 
-
-tbl_id = "N/A"; tbl_name = "N/A"; tbl_gend = "N/A"; tbl_birt = "N/A"; tbl_age = "N/A"; tbl_aliv = "N/A"; tbl_deat = "N/A"; tbl_chil = "N/A"; tbl_spou = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today()
-f_id = "N/A"; f_married = "N/A" ; f_div = "N/A"; f_husbid = "N/A"; f_husbname = "N/A"; f_wifeid = "N/A"; f_wifename = "N/A"; f_chil = "N/A";
 name_list = []
 id_list = []
 
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
-
-# define variables for table y
 name_list = []; id_list = []
+
+def _matchId(id):
+    gotmatch = 0
+    fcopy = open(arg_1, 'r')
+    for line in fcopy:
+        #print(line)
+
+        matchToken = line.split() #list of the line
+        matchStrList = matchToken[2:]
+        matchFullStr = ' '.join(str(i) for i in matchStrList)
+        if line == "\n": continue #ignore the empty lines
+        if (int(matchToken[0]) == 0) and (gotmatch == 1) and (matchToken[2] == "INDI" or "FAM"): return "N/A"
+        if (int(matchToken[0]) == 0) and (matchToken[1] == id): gotmatch = 1
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "NAME") and (gotmatch == 1): gotmatch = 0; matchFullStr = ' '.join(str(i) for i in matchStrList); return matchFullStr; print (matchFullStr)
+    fcopy.close()
 
 
 # """
 for line in f:
 
-    ogline = line
+    token = line.split() #list of the line
+    numtok = len(token)
 
-    a = 0
-    while ogline[a] != " " and ogline[a] != '\n': #identify last index of first token
-        a+=1
-    level = line[0:a] #first token
+    if line == "\n": continue #ignore the empty lines
 
-    #input
-    if level in validlevels:
-        line = line.strip('\n')
-        # print("--> " + line)
+    tok0 = int(token[0]) #first token: level 012
 
-    #output
-        i = a+1
-        linelen = (len(ogline))
-        while ogline[i] != " " and ogline[i] != '\n': #identify last index of second token
-            if a+1+i > linelen:
-                # if line[a+1:i+1] in validtags: #second token is a valid tag
-                #     if (level == "1") and (line[a+1:i+1] in singletag):
-                #         if line[a+1:i+1] == "NAME": print("<-- " + level + "|" + line[a+1:i+1] + "|Y|")
-                #     else:
-                #         #raise ValueError('Invalid level with the tag: <' + line[a+1:i+1] + '>')
-                #         print("Invalid level: <" + level + "> with the tag: <" + line[a+1:i+1] + ">")
-                # else:
-                #     print("<-- " + level + "|" + line[a+1:i+1] + "|N|")
-                quit()
-            else:
-                i+=1
-        tag = line[a+1:i] #second token
+    if (tok0 < 0) or (tok0 > 2): print("Invalid level.") #checks for invalid level
 
-        if tag in validtags: #second token is a valid tag
+    tok1 = token[1] #second token: tags
 
-            # if (line[0] == "0") and (tag in tag0):
-            #     print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
-            # elif (line[0] == "1") and (tag in tag1):
-            if (line[0] == "1") and (tag in tag1):
+    if tok1 in validtags: #second token is a valid tag
+        # if numtok < 3: #only a tag is present, no string        ex: 1 BIRT/MARR/DIV
+        #     print("todo: " + tok1)
 
-                # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
+        # #level 0 tags
+        # if (tok0 == 0) and (tok1 in tag0): #INDI and FAM does not pass this if statement
+        #     print("Debug: Level " + str(tok0) + ", but it's not important.")
 
-                if (tag == "NAME"): 
-                    tbl_name = line[i+1:]
-                    name_list.append(tbl_name)
-                    id_list.append(tbl_id)
-                   
+        #level 1 tags
+        strList = token[2:]
+        fullStr = ' '.join(str(i) for i in strList)
+
+        if (tok0 == 1) and (tok1 in tag1):
+            if tok1 == "NAME": tblx_name = fullStr
+            if tok1 == "DIV": divfday = 1
+            if tok1 == "BIRT": birfday = 1
+            if tok1 == "DEAT": deafday = 1
+            if tok1 == "MARR": marfday = 1
+            if tok1 == "SEX": tblx_gend = fullStr
+            if tok1 == "FAMC": tblx_carr.append(fullStr); tblx_chil = tblx_carr
+            if tok1 == "FAMS": tblx_sarr.append(fullStr); print(fullStr); tblx_spou = tblx_sarr
+            if tok1 == "CHIL": tbly_carr.append(fullStr); tbly_chil = tbly_carr
+
+            if tok1 == "WIFE":
+                tbly_wifi = fullStr
+                matchName = _matchId(tbly_wifi)
+                print(type(matchName))
+                tbly_wifn = matchName
+
+            if tok1 == "HUSB":
+                tbly_husi = fullStr
+                matchName = _matchId(tbly_husi)
+                print(type(matchName))
+                tbly_husn = matchName
+
+        #level 2 tags
+        elif (tok0 == 2) and (tok1 in tag2):
+            if tok1 == "DATE":
+                if birfday == 1: tblx_birt = fullStr; birfday = 0
+                if deafday == 1: tblx_deat = fullStr; deafday = 0; tblx_aliv = False
+                if marfday == 1: tbly_marr = fullStr; marfday = 0
+                if divfday == 1: tbly_divo = fullStr; divfday = 0
+    
+    else: #third token is a valid tag   ex: INDI or FAM
+
+        tok2 = token[2]
+
+        if tok2 in extag:
+            if tok2 == "INDI":
+                if tblx_id != "N/A":
                     
-                    
-                if (tag == "SEX"): tbl_gend = line[i+1:]
-                if (tag == "BIRT"): birfday = 1
-                if (tag == "DEAT"): deafday = 1
-                if (tag == "FAMC"): tbl_chil = "'" + line[i+1:] + "'"
-                if (tag == "FAMS"): tbl_spou = "'" + line[i+1:] + "'"
-                if (tag == "WIFE"):
-                  print(id_list)
-                  m =line.split(" ")[2]
-                  f_wifeid = m
-                  f_wifename = name_list[id_list.index(m)]
-                if (tag == "HUSB"):
-                      m =line.split(" ")[2]
-                      f_husbid = m
-                      f_husbname = name_list[id_list.index(m)]
-                   
+                    birth_split = tblx_birt.split(" ")
+                    death_split = tblx_deat.split(" ")
+                    if tblx_aliv == True: tblx_age = todays_date.year - int(birth_split[2])
+                    elif tblx_aliv == False: tblx_age = int(death_split[2]) - int(birth_split[2])
 
-                if (tag == "NAME"): tblx_name = line[i+1:]
-                if (tag == "NAME"): 
-                    tblx_name = line[i+1:]
-                    name_list.append(tblx_name)
-                    id_list.append(tblx_id)
+                    x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
+                    tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"; tblx_carr = []; tblx_sarr = []
+                    tblx_id = tok1
+                    tblx_aliv = True
 
+                elif tblx_id == "N/A":
 
-                if (tag == "SEX"): tblx_gend = line[i+1:]
-                if (tag == "BIRT"): birfday = 1
-                if (tag == "DEAT"): deafday = 1
-                if (tag == "FAMC"): tblx_carr.append(line[i+1:]); tblx_chil = tblx_carr
-                if (tag == "FAMS"): tblx_sarr.append(line[i+1:]); tblx_spou = tblx_sarr
+                    tblx_id = tok1
+                    tblx_aliv = True
 
-                if (tag == "MARR"): marfday = 1
-                if (tag == "DIV"): divfday = 1
-                if (tag == "CHIL"): tbly_carr.append(line[i+1:]); tbly_chil = tbly_carr
-                if (tag == "HUSB"): 
-                    m = line[i+1:].rstrip()
-                    tbly_husi = m
-                    tbly_husn = name_list[id_list.index(m)]               
+            if tok2 == "FAM":
+                if tbly_id != "N/A":
+                    y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
+                    tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"; tbly_carr = []
+                    tbly_id = tok1
 
+                elif tbly_id == "N/A":
+                    tbly_id = tok1
 
-                if (tag == "WIFE"): 
-                    m = line[i+1:].rstrip()
-                    tbly_wifi = m
-                    tbly_wifn = name_list[id_list.index(m)]
+        else: 
+            print("Invalid tag as 3rd token")
 
-
-            elif (line[0] == "2") and (tag in tag2):
-                # print("<-- " + level + "|" + tag + "|Y|" + line[i+1:])
-                if (tag == "DATE"): 
-                    if (birfday == 1): tblx_birt = line[i+1:]; birfday = 0
-                    if (deafday == 1): tblx_deat = line[i+1:]; deafday = 0; tblx_aliv = False
-
-                    if (marfday == 1): tbly_marr = line[i+1:]; marfday = 0
-                    if (divfday == 1): tbly_divo = line[i+1:]; divfday = 0
-            # else:
-                #raise ValueError('Invalid level with the tag: <' + tag + '>')
-                # print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
-
-        else: #second token is not a valid tag, we look at third token :)
-            
-            tag = line[i+1:]
-
-            if tag in validtags:
-                if tag in extag: #INDI, FAM only
-                    if (line[0] == "0"):
-                        # print("<-- " + line[0] + "|" + tag + "|Y|" + line[2:i+1])
-                        if (tag == "INDI"):
-                            # check if we've been here before and write-out then clear previous table data if we have
-                            if (tblx_id != "N/A"):
-                                # print (red + "Next Customer!" + white)
-
-                                birth_split = tbl_birt.split(" ")
-                                death_split = tbl_deat.split(" ")
-                                if tbl_aliv == True:
-                                    tbl_age = todays_date.year - int(birth_split[2])
-                                elif tbl_aliv == False:
-                                    tbl_age = int(death_split[2]) - int(birth_split[2])
-                                x.add_row([tbl_id, tbl_name, tbl_gend, tbl_birt, tbl_age, tbl_aliv, tbl_deat, tbl_chil, tbl_spou])
-                                tbl_id = "N/A"; tbl_name = "N/A"; tbl_gend = "N/A"; tbl_birt = "N/A"; tbl_age = "N/A"; tbl_aliv = "N/A"; tbl_deat = "N/A"; tbl_chil = "N/A"; tbl_spou = "N/A"
-                                tbl_id = line.split(" ")[1]
-                                tbl_aliv = True
-                            elif (tbl_id == "N/A"):
-                                tbl_id = line.split(" ")[1]
-                                tbl_aliv = True
-                        if (line.split(" ")[2] == "FAM"):
-                            print("hu")
-                            if(f_id != "N/A"):
-                                    y.add_row([f_id, f_married,f_div, f_husbid, f_husbname, f_wifeid,f_wifename, f_chil ])
-                                    f_id = line.split(" ")[1]
-                                    f_married = "N/A"; f_div = "N/A"; f_husbid = "N/A"; f_husbname = "N/A"; f_wifeid = "N/A"; f_wifename = "N/A"; f_chil = "N/A"
-                            else:
-                                 f_id = line.split(" ")[1]
-                         # reset table y from 0 terminater
-                        
-                            
-                                
-                        
-
-
-                                birth_split = tblx_birt.split(" ")
-                                death_split = tblx_deat.split(" ")
-                                if tblx_aliv == True:
-                                    tblx_age = todays_date.year - int(birth_split[2])
-                                elif tblx_aliv == False:
-                                    tblx_age = int(death_split[2]) - int(birth_split[2])
-                                    
-                                x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
-                                tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"; tblx_carr = []; tblx_sarr = []
-                                tblx_id = line[2:i+1].rstrip()
-                                tblx_aliv = True
-                            elif (tblx_id == "N/A"):
-                                tblx_id = line[2:i+1].rstrip()
-                                tblx_aliv = True
-                        if (tag == "FAM"):
-                            # reset table y from 0 terminater
-                            if (tbly_id != "N/A"):
-                                y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
-                                tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"; tbly_carr = []
-                                tbly_id = line[2:i+1]
-                            elif (tbly_id == "N/A"):
-                                tbly_id = line[2:i+1]
-
-                    else:
-
-                    # else:
-                        #raise ValueError('Invalid level with the tag: <' + tag + '>')
-                        # print("Invalid level: <" + level + "> with the tag: <" + tag + ">.")
-                # else:
-                    #raise ValueError('Only tags valid for this format: ' + extag)
-                    # print("Only tags valid for this format: " + extag)
-            # else: #no valid tag provided
-                # print("<-- " + level + "|" + line[a+1:i] + "|" + red + "N" + white + "|" + tag)
-
-    else:
-        if ogline[0] == '\n':
-            line = line.strip('\n')
-        # else:
-        #     line = line.strip('\n')
-        #     print("--> " + line)
-        #     #raise ValueError('Invalid level: <' + level + '>')
-        #     print("Invalid level: <" + level + ">")
-# """
-
-#this is INDI table
-# capture the last table entry since there are no more terminaters (0)
 birth_split = tblx_birt.split(" ")
 death_split = tblx_deat.split(" ")
-if tblx_aliv == True:
-    tblx_age = todays_date.year - int(birth_split[2])
-elif tblx_aliv == False:
-    tblx_age = int(death_split[2]) - int(birth_split[2])
-    
-x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
+if tblx_aliv == True: tblx_age = todays_date.year - int(birth_split[2])
+elif tblx_aliv == False: tblx_age = int(death_split[2]) - int(birth_split[2])
 
+x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
 
+# """
 print("Individuals")
 print(x.get_string(sortby = "ID"))
 print("Families")
