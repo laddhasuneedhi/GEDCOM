@@ -41,7 +41,6 @@ def _matchId(id):
     gotmatch = 0
     fcopy = open(arg_1, 'r')
     for line in fcopy:
-        #print(line)
 
         matchToken = line.split() #list of the line
         matchStrList = matchToken[2:]
@@ -87,19 +86,17 @@ for line in f:
             if tok1 == "MARR": marfday = 1
             if tok1 == "SEX": tblx_gend = fullStr
             if tok1 == "FAMC": tblx_carr.append(fullStr); tblx_chil = tblx_carr
-            if tok1 == "FAMS": tblx_sarr.append(fullStr); print(fullStr); tblx_spou = tblx_sarr
+            if tok1 == "FAMS": tblx_sarr.append(fullStr); tblx_spou = tblx_sarr
             if tok1 == "CHIL": tbly_carr.append(fullStr); tbly_chil = tbly_carr
 
             if tok1 == "WIFE":
                 tbly_wifi = fullStr
                 matchName = _matchId(tbly_wifi)
-                print(type(matchName))
                 tbly_wifn = matchName
 
             if tok1 == "HUSB":
                 tbly_husi = fullStr
                 matchName = _matchId(tbly_husi)
-                print(type(matchName))
                 tbly_husn = matchName
 
         #level 2 tags
@@ -142,8 +139,8 @@ for line in f:
                 elif tbly_id == "N/A":
                     tbly_id = tok1
 
-        else: 
-            print("Invalid tag as 3rd token")
+        # else: 
+        #     print("Invalid tag as 3rd token")
 
 birth_split = tblx_birt.split(" ")
 death_split = tblx_deat.split(" ")
