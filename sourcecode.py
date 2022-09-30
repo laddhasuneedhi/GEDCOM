@@ -4,7 +4,7 @@
 
 import sys
 from prettytable import PrettyTable
-from datetime import date
+from datetime import date, datetime
 import calendar
 
 validtags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"]
@@ -15,12 +15,13 @@ extag = ["INDI", "FAM"]
 singletag = ["BIRT", "MARR", "DIV"]
 validlevels = ["0", "1", "2"]
 
-if len(sys.argv) == 1:
-	print ("\nPlease provide input filename as the first argument and try again.\n")
-	quit()
+# if len(sys.argv) == 1:
+# 	print ("\nPlease provide input filename as the first argument and try again.\n")
+# 	quit()
 	
 arg_0 = sys.argv[0]
-arg_1 = sys.argv[1]
+# arg_1 = sys.argv[1]
+arg_1 = "input.txt"
 
 f = open(arg_1, 'r')
 
@@ -30,14 +31,16 @@ x.field_names = ["ID", "Name", "Gender", "Birthday", "Age", "Alive", "Death", "C
 y.field_names = ["ID", "Married", "Divorced", "Husband ID", "Husband Name", "Wife ID", "Wife Name", "Children"]
 
 birfday = 0; deafday = 0; todays_date = date.today()
-name_list = []
-id_list = []
+name_list = []; id_list = []
 
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
-name_list = []; id_list = []
+tempbday = "N/A"; tempdday = "N/A"; us03List = []
 
+abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
+
+# helper functions
 def _matchId(id):
     
     gotmatch = 0
@@ -55,10 +58,33 @@ def _matchId(id):
     
     fcopy.close()
 
-def age(given_date, birthdate):
+def _age(given_date, birthdate):
 
     age = given_date.year - birthdate.year - ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
+
+def _us03(bday, dday, id):
+
+    # converts month name to a number
+    bmn_to_num = abbr_to_num[bday[1]]
+    dmn_to_num = abbr_to_num[dday[1]]
+    # yyyy-mm-dd format
+    birth_date = date(int(bday[2]), bmn_to_num, int(bday[0]))
+    death_date = date(int(dday[2]), dmn_to_num, int(dday[0]))
+    # find age difference
+    age_diff = _age(death_date, birth_date)
+    
+    if age_diff < 0:
+
+        # list of INDI who have negative ages
+        s = [id, str(birth_date), str(death_date)]
+        us03List.append(list(s))
+        return us03List
+
+def _us03print(list):
+    
+    for x in list:
+        print("ERROR: INDIVIDUAL: US03: 9: " + x[0] + ": Died " + x[1] + " before born " + x[2])
 
 # """
 for line in f:
@@ -109,8 +135,32 @@ for line in f:
         #level 2 tags
         elif (tok0 == 2) and (tok1 in tag2):
             if tok1 == "DATE":
-                if birfday == 1: tblx_birt = fullStr; birfday = 0
-                if deafday == 1: tblx_deat = fullStr; deafday = 0; tblx_aliv = False
+
+                if birfday == 1: 
+                    tblx_birt = fullStr
+
+                    # US03: checks if person died before they were born
+                    tempbday = tblx_birt.split()
+                    if tempdday != "N/A":
+                        _us03(tempbday, tempdday, tblx_id)
+                        tempbday = "N/A"
+                        tempdday = "N/A"
+                    
+                    birfday = 0
+
+                if deafday == 1: 
+                    tblx_deat = fullStr
+
+                    # US03: checks if person died before they were born
+                    tempdday = tblx_deat.split()
+                    if tempbday != "N/A":
+                        _us03(tempbday, tempdday, tblx_id)
+                        tempbday = "N/A"
+                        tempdday = "N/A"
+                    
+                    deafday = 0
+                    tblx_aliv = False
+
                 if marfday == 1: tbly_marr = fullStr; marfday = 0
                 if divfday == 1: tbly_divo = fullStr; divfday = 0
     
@@ -127,12 +177,13 @@ for line in f:
                     birth_split = tblx_birt.split()
                     death_split = tblx_deat.split()
                     # convert month name to number  ex: May -> 5
-                    abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
                     bmn_to_num = abbr_to_num[birth_split[1]]
-                    if tblx_aliv == True: tblx_age = age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+                    if tblx_aliv == True: tblx_age = _age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
                     elif tblx_aliv == False:
                         dmn_to_num = abbr_to_num[death_split[1]]
-                        tblx_age = age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+                        tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+                    # if tblx_aliv == True: tblx_age = todays_date.year - int(birth_split[2])
+                    # elif tblx_aliv == False: tblx_age = int(death_split[2]) - int(birth_split[2])
 
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
                     tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"; tblx_carr = []; tblx_sarr = []
@@ -159,12 +210,11 @@ for line in f:
 today = date.today()
 birth_split = tblx_birt.split()
 death_split = tblx_deat.split()
-abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
 bmn_to_num = abbr_to_num[birth_split[1]]
-if tblx_aliv == True: tblx_age = age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+if tblx_aliv == True: tblx_age = _age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
 elif tblx_aliv == False:
     dmn_to_num = abbr_to_num[death_split[1]]
-    tblx_age = age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+    tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
 
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
@@ -174,5 +224,7 @@ print("Individuals")
 print(x.get_string(sortby = "ID"))
 print("Families")
 print(y.get_string(sortby = "ID"))
+
+_us03print(us03List)
 
 f.close()
