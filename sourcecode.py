@@ -4,9 +4,8 @@
 
 import sys
 from prettytable import PrettyTable
-from datetime import date, datetime
+from datetime import date
 import calendar
-from datetime import datetime
 
 validtags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"]
 tag0 = ["INDI", "FAM", "HEAD", "TRLR", "NOTE"]
@@ -130,7 +129,6 @@ for line in f:
                     # convert month name to number  ex: May -> 5
                     abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
                     bmn_to_num = abbr_to_num[birth_split[1]]
-
                     if tblx_aliv == True: tblx_age = age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
                     elif tblx_aliv == False:
                         dmn_to_num = abbr_to_num[death_split[1]]
@@ -163,7 +161,6 @@ birth_split = tblx_birt.split()
 death_split = tblx_deat.split()
 abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
 bmn_to_num = abbr_to_num[birth_split[1]]
-
 if tblx_aliv == True: tblx_age = age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
 elif tblx_aliv == False:
     dmn_to_num = abbr_to_num[death_split[1]]
