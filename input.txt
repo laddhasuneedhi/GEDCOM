@@ -90,7 +90,7 @@
 0 @I09@ INDI
 1 NAME Astrid /Chang/
 1 BIRT
-2 DATE 21 Apr 2008
+2 DATE 21 Mar 2008
 1 SEX F
 1 FAMC @F03@
 
