@@ -66,14 +66,14 @@ def _age(given_date, birthdate):
     age = given_date.year - birthdate.year - ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
 
-def _us03(bday, dday, id):
+def _us03(bdate, ddate, id):
 
     # converts month name to a number
-    bmn_to_num = abbr_to_num[bday[1]]
-    dmn_to_num = abbr_to_num[dday[1]]
+    bmn_to_num = abbr_to_num[bdate[1]]
+    dmn_to_num = abbr_to_num[ddate[1]]
     # yyyy-mm-dd format
-    birth_date = date(int(bday[2]), bmn_to_num, int(bday[0]))
-    death_date = date(int(dday[2]), dmn_to_num, int(dday[0]))
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
     # find age difference
     age_diff = _age(death_date, birth_date)
     
@@ -89,18 +89,18 @@ def _us03print(list):
     for x in list:
         print("ERROR: INDIVIDUAL: US03: ??: " + x[0] + ": Died " + x[1] + " before born " + x[2])
 
-def _us04(mday, vday, id):
+def _us04(mdate, vdate, id):
 
     # converts month name to a number
-    mmn_to_num = abbr_to_num[mday[1]]
-    vmn_to_num = abbr_to_num[vday[1]]
+    mmn_to_num = abbr_to_num[mdate[1]]
+    vmn_to_num = abbr_to_num[vdate[1]]
     # yyyy-mm-dd format
-    marr_date = date(int(mday[2]), mmn_to_num, int(mday[0]))
-    divo_date = date(int(vday[2]), vmn_to_num, int(vday[0]))
+    marr_date = date(int(mdate[2]), mmn_to_num, int(mdate[0]))
+    divo_date = date(int(vdate[2]), vmn_to_num, int(vdate[0]))
     # find age difference
-    age_diff = _age(divo_date, marr_date)
+    year_diff = _age(divo_date, marr_date)
     
-    if age_diff < 0:
+    if year_diff < 0:
 
         # list of INDI who have negative ages
         s = [id, str(marr_date), str(divo_date)]
@@ -110,7 +110,7 @@ def _us04(mday, vday, id):
 def _us04print(list):
     
     for x in list:
-        print("ERROR: FAMILY: US04: ??: " + x[0] + ": Divorced " + x[1] + " before married " + x[2])
+        print("ERROR: FAMILY: US04: ??: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
 # """
 for line in f:
@@ -198,6 +198,7 @@ for line in f:
                         tempvday = "N/A"
                     
                     marfday = 0
+
                 if divfday == 1:
                     tbly_divo = fullStr
 
