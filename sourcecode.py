@@ -98,7 +98,7 @@ def _us04(mday, vday, id):
     marr_date = date(int(mday[2]), mmn_to_num, int(mday[0]))
     divo_date = date(int(vday[2]), vmn_to_num, int(vday[0]))
     # find age difference
-    age_diff = _age(divo_date, marr_date); print(age_diff)
+    age_diff = _age(divo_date, marr_date)
     
     if age_diff < 0:
 
