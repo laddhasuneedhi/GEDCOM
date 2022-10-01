@@ -19,8 +19,10 @@ validlevels = ["0", "1", "2"]
 # 	print ("\nPlease provide input filename as the first argument and try again.\n")
 # 	quit()
 	
-arg_0 = sys.argv[0]
+# arg_0 = sys.argv[0]
 # arg_1 = sys.argv[1]
+
+arg_0 = sys.argv[0]
 arg_1 = "input.txt"
 
 f = open(arg_1, 'r')
@@ -96,7 +98,7 @@ for line in f:
 
     tok0 = int(token[0]) #first token: level 012
 
-    if (tok0 < 0) or (tok0 > 2): print("Invalid level.") #checks for invalid level
+    if (tok0 < 0) or (tok0 > 2): continue # print("Invalid level.") #checks for invalid level
 
     tok1 = token[1] #second token: tags
 
@@ -225,6 +227,7 @@ print(x.get_string(sortby = "ID"))
 print("Families")
 print(y.get_string(sortby = "ID"))
 
+print("\n")
 _us03print(us03List)
 
 f.close()
