@@ -23,7 +23,7 @@ validlevels = ["0", "1", "2"]
 # arg_1 = sys.argv[1]
 
 arg_0 = sys.argv[0]
-arg_1 = "input.txt"
+arg_1 = "famtree.ged"
 
 f = open(arg_1, 'r')
 
@@ -41,8 +41,22 @@ birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr 
 tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"
 us03List = []; us04List = []
 
-abbr_to_num = {name: num for num, name in enumerate(calendar.month_abbr) if num}
+abbr_to_num = {
+    'JAN' : 1,
+    'FEB' : 2,
+    'MAR' : 3,
+    'APR' : 4,
+    'MAY' : 5,
+    'JUN' : 6,
+    'JUL' : 7,
+    'AUG' : 8,
+    'SEP' : 9,
+    'OCT' : 10,
+    'NOV' : 11,
+    'DEC' : 12
+}
 
+# """
 # helper functions
 def _matchId(id):
     
@@ -112,7 +126,6 @@ def _us04print(list):
     for x in list:
         print("ERROR: FAMILY: US04: ??: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
-# """
 for line in f:
 
     token = line.split() #list of the line
@@ -127,8 +140,8 @@ for line in f:
     tok1 = token[1] #second token: tags
 
     if tok1 in validtags: #check if second token is a valid tag
-        # if numtok < 3: #only a tag is present, no string        ex: 1 BIRT/MARR/DIV
-        #     print("todo: " + tok1)
+        # if (numtok < 3) and (tok1 not in singletag): continue #only a tag is present, no string        ex: 1 BIRT/MARR/DIV
+            # print("todo: " + tok1)
 
         # #level 0 tags
         # if (tok0 == 0) and (tok1 in tag0): #INDI and FAM does not pass this if statement
@@ -213,6 +226,8 @@ for line in f:
     
     else: #check if third token is a valid tag   ex: INDI or FAM
 
+        if numtok < 3: continue
+
         tok2 = token[2]
 
         if tok2 in extag:
@@ -250,9 +265,10 @@ for line in f:
 
                 elif tbly_id == "N/A":
                     tbly_id = tok1
-
-        # else: 
-        #     print("Invalid tag as 3rd token")
+        
+        else: 
+            continue
+            # print("Invalid tag as 3rd token")
 
 today = date.today()
 birth_split = tblx_birt.split()
@@ -266,7 +282,7 @@ elif tblx_aliv == False:
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
 
-# """
+
 print("Individuals")
 print(x.get_string(sortby = "ID"))
 print("Families")
@@ -275,5 +291,6 @@ print(y.get_string(sortby = "ID"))
 print("\n")
 _us03print(us03List)
 _us04print(us04List)
+
 
 f.close()
