@@ -87,7 +87,7 @@ def _us03(bdate, ddate, id):
 def _us03print(list):
     
     for x in list:
-        print("ERROR: INDIVIDUAL: US03: ??: " + x[0] + ": Died " + x[1] + " before born " + x[2])
+        print("ERROR: INDIVIDUAL: US03: ??: " + x[0] + ": Died " + x[2] + " before born " + x[1])
 
 def _us04(mdate, vdate, id):
 
