@@ -19,7 +19,7 @@
 1 SEX F
 1 FAMS @F02@
 1 DEAT
-2 DATE 25 Mar 2022
+2 DATE 25 Mar 1960
 
 0 NOTE next generation of an imaginary family
 
@@ -64,7 +64,7 @@
 1 MARR
 2 DATE 26 Sep 1979
 1 DIV
-2 DATE 23 Dec 2021
+2 DATE 23 Dec 1978
 1 HUSB @I05@
 1 WIFE @I06@
 1 CHIL @I01@
