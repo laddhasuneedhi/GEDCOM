@@ -38,7 +38,7 @@ name_list = []; id_list = []
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
-tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"
+tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"; tempmday2 = "N/A"; tempdday2 = "N/A"
 us03List = []; us04List = []; us05List = []; us10List = []
 
 abbr_to_num = {
@@ -98,8 +98,7 @@ def _us05(mdate, ddate, id):
 def _us05print(list):
 
     for x in list:
-        print("ERROR: FAMILY: US05: " + x[0])
-        # + " Married " + x[1] + "after death"
+        print("ERROR: FAMILY: US05: " + x[0] + ": Married " + x[1] + " after death")
 
 
 # sprint 1 US10 Marriage before the age of 14
@@ -174,7 +173,7 @@ def _us03(bdate, ddate, id):
 def _us03print(list):
     
     for x in list:
-        print("ERROR: INDIVIDUAL: US03: ??: " + x[0] + ": Died " + x[2] + " before born " + x[1])
+        print("ERROR: INDIVIDUAL: US03: " + x[0] + ": Died " + x[2] + " before born " + x[1])
 
 def _us04(mdate, vdate, id):
 
@@ -197,7 +196,7 @@ def _us04(mdate, vdate, id):
 def _us04print(list):
     
     for x in list:
-        print("ERROR: FAMILY: US04: ??: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
+        print("ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
 
 
@@ -267,10 +266,16 @@ for line in f:
 
                     # us03: checks if person died before they were born
                     tempdday = tblx_deat.split()
+                    tempdday2 = tblx_deat.split()
                     if tempbday != "N/A":
                         _us03(tempbday, tempdday, tblx_id)
                         tempbday = "N/A"
                         tempdday = "N/A"
+                        
+                    if tempmday2 != "N/A":
+                        _us05(tempmday2, tempdday2, tbly_id)
+                        tempmday2 = "N/A"
+                        tempdday2 = "N/A"
                     
                     deafday = 0
                     tblx_aliv = False
@@ -280,16 +285,16 @@ for line in f:
                     
                     # us04: checks if married before divorce
                     tempmday = tbly_marr.split()
+                    tempmday2 = tbly_marr.split()
                     if tempvday != "N/A":
                         _us04(tempmday, tempvday, tbly_id)
                         tempmday = "N/A"
                         tempvday = "N/A"
                         
-                        if tempdday != "N/A":
-                        
-                            _us05(tempmday, tempdday, tbly_id)
-                            tempmday = "N/A"
-                            tempdday = "N/A"
+                    if tempdday2 != "N/A":
+                        _us05(tempmday2, tempdday2, tbly_id)
+                        tempmday2 = "N/A"
+                        tempdday2 = "N/A"
                     
                     marfday = 0
 
@@ -372,7 +377,6 @@ print(y.get_string(sortby = "ID"))
 print("\n")
 _us03print(us03List)
 _us04print(us04List)
-print(us05List)
 _us05print(us05List)
 
 f.close()
