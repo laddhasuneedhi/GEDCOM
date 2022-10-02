@@ -39,7 +39,7 @@ tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_a
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
 tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"
-us03List = []; us04List = []; 
+us03List = []; us04List = []; us05List = []; us10List = []
 
 abbr_to_num = {
     'JAN' : 1,
@@ -78,6 +78,50 @@ def _age(given_date, birthdate):
 
     age = given_date.year - birthdate.year - ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
+
+# sprint 1 US05 Marriage before death. Marriage can't be after death
+def _us05(mdate, ddate, id):
+    marriageMonth = abbr_to_num[mdate[1]]
+    deathMonth = abbr_to_num[ddate[1]]
+    
+    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
+    death_date = date(int(ddate[2]), deathMonth, int(ddate[0]))
+
+    age_diff = _age(marr_date, death_date)
+
+    if age_diff < 0:
+        negativeAges = [id, str(marr_date), str(death_date)]
+        us05List.append(list(negativeAges))
+        return us05List
+
+
+def _us05print(list):
+
+    for x in list:
+        print("ERROR: FAMILY: US05: " + x[0])
+        # + " Married " + x[1] + "after death"
+
+
+# sprint 1 US10 Marriage before the age of 14
+def _us10(mdate, bdate, id):
+    marriageMonth = abbr_to_num[mdate[1]]
+    birthMonth = abbr_to_num[bdate[1]]
+    
+    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
+    birth_date = date(int(bdate[2]), birthMonth, int(bdate[0]))
+
+    age_diff = _age(marr_date, birth_date)
+
+    if age_diff < 14:
+        lessThan_14_List = [id, str(marr_date), str(birth_date)]
+        us10List.append(list(lessThan_14_List))
+        return us10List
+
+def _us10print(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US10: " + x[0] + "Married " + x[1] + " before the age of 14" )
+
 
 def _us11(sndmage, divdate, id):
     us11List = []
@@ -240,6 +284,12 @@ for line in f:
                         _us04(tempmday, tempvday, tbly_id)
                         tempmday = "N/A"
                         tempvday = "N/A"
+                        
+                        if tempdday != "N/A":
+                        
+                            _us05(tempmday, tempdday, tbly_id)
+                            tempmday = "N/A"
+                            tempdday = "N/A"
                     
                     marfday = 0
 
@@ -322,6 +372,7 @@ print(y.get_string(sortby = "ID"))
 print("\n")
 _us03print(us03List)
 _us04print(us04List)
-
+print(us05List)
+_us05print(us05List)
 
 f.close()
