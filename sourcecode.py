@@ -23,7 +23,7 @@ validlevels = ["0", "1", "2"]
 # arg_1 = sys.argv[1]
 
 arg_0 = sys.argv[0]
-arg_1 = "famtree.ged"
+arg_1 = "famtreeus03us04.ged"
 
 f = open(arg_1, 'r')
 
