@@ -38,8 +38,9 @@ name_list = []; id_list = []
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
-tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"
-us03List = []; us04List = []; 
+tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"; us05tempmday = "N/A"; us05tempdday = "N/A"; us10tempbday = "N/A"; us10tempmday = "N/A"
+us10tblx_id = "N/A"
+us03List = []; us04List = []; us05List = []; us10List = []
 
 abbr_to_num = {
     'JAN' : 1,
@@ -78,6 +79,91 @@ def _age(given_date, birthdate):
 
     age = given_date.year - birthdate.year - ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
+
+# sprint 1
+def _us03(bdate, ddate, id):
+
+    # converts month name to a number
+    bmn_to_num = abbr_to_num[bdate[1]]
+    dmn_to_num = abbr_to_num[ddate[1]]
+    # yyyy-mm-dd format
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
+    # find age difference
+    age_diff = _age(death_date, birth_date)
+    
+    if age_diff < 0:
+
+        # list of INDI who have negative ages
+        s = [id, str(birth_date), str(death_date)]
+        us03List.append(list(s))
+        return us03List
+
+def _us03print(list):
+    
+    for x in list:
+        print("ERROR: INDIVIDUAL: US03: " + x[0] + ": Died " + x[2] + " before born " + x[1])
+
+def _us04(mdate, vdate, id):
+
+    # converts month name to a number
+    mmn_to_num = abbr_to_num[mdate[1]]
+    vmn_to_num = abbr_to_num[vdate[1]]
+    # yyyy-mm-dd format
+    marr_date = date(int(mdate[2]), mmn_to_num, int(mdate[0]))
+    divo_date = date(int(vdate[2]), vmn_to_num, int(vdate[0]))
+    # find age difference
+    year_diff = _age(divo_date, marr_date)
+    
+    if year_diff < 0:
+
+        # list of INDI who have negative ages
+        s = [id, str(marr_date), str(divo_date)]
+        us04List.append(list(s))
+        return us04List
+
+def _us04print(list):
+    
+    for x in list:
+        print("ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
+
+def _us05(mdate, ddate, id):
+    marriageMonth = abbr_to_num[mdate[1]]
+    deathMonth = abbr_to_num[ddate[1]]
+    
+    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
+    death_date = date(int(ddate[2]), deathMonth, int(ddate[0]))
+
+    age_diff = _age(marr_date, death_date)
+
+    if age_diff < 0:
+        negativeAges = [id, str(marr_date), str(death_date)]
+        us05List.append(list(negativeAges))
+        return us05List
+
+def _us05print(list):
+
+    for x in list:
+        print("ERROR: FAMILY: US05: " + x[0] + ": Married " + x[1] + " after death")
+
+def _us10(mdate, bdate, id):
+    marriageMonth = abbr_to_num[mdate[1]]
+    birthMonth = abbr_to_num[bdate[1]]
+    
+    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
+    birth_date = date(int(bdate[2]), birthMonth, int(bdate[0]))
+
+    age_diff = _age(marr_date, birth_date)
+
+    if age_diff < 14:
+        lessThan_14_List = [id, str(marr_date), str(birth_date)]
+        us10List.append(list(lessThan_14_List))
+        return us10List
+
+def _us10print(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US10: " + x[0] + " Married " + x[1] + " before the age of 14" )
 
 def _us11(sndmage, divdate, id):
     us11List = []
@@ -123,54 +209,6 @@ def _us12(mm_id,mother_birth, dd_id, father_birth, children_birth):
             return False
     return True
     
-
-
-def _us03(bdate, ddate, id):
-
-    # converts month name to a number
-    bmn_to_num = abbr_to_num[bdate[1]]
-    dmn_to_num = abbr_to_num[ddate[1]]
-    # yyyy-mm-dd format
-    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
-    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
-    # find age difference
-    age_diff = _age(death_date, birth_date)
-    
-    if age_diff < 0:
-
-        # list of INDI who have negative ages
-        s = [id, str(birth_date), str(death_date)]
-        us03List.append(list(s))
-        return us03List
-
-
-def _us03print(list):
-    
-    for x in list:
-        print("ERROR: INDIVIDUAL: US03: ??: " + x[0] + ": Died " + x[2] + " before born " + x[1])
-
-def _us04(mdate, vdate, id):
-
-    # converts month name to a number
-    mmn_to_num = abbr_to_num[mdate[1]]
-    vmn_to_num = abbr_to_num[vdate[1]]
-    # yyyy-mm-dd format
-    marr_date = date(int(mdate[2]), mmn_to_num, int(mdate[0]))
-    divo_date = date(int(vdate[2]), vmn_to_num, int(vdate[0]))
-    # find age difference
-    year_diff = _age(divo_date, marr_date)
-    
-    if year_diff < 0:
-
-        # list of INDI who have negative ages
-        s = [id, str(marr_date), str(divo_date)]
-        us04List.append(list(s))
-        return us04List
-
-def _us04print(list):
-    
-    for x in list:
-        print("ERROR: FAMILY: US04: ??: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
 
 
@@ -228,10 +266,18 @@ for line in f:
 
                     # us03: checks if person died before they were born
                     tempbday = tblx_birt.split()
+                    us10tempbday = tblx_birt.split()
+                    us10tblx_id = tblx_id
+                    
                     if tempdday != "N/A":
                         _us03(tempbday, tempdday, tblx_id)
                         tempbday = "N/A"
                         tempdday = "N/A"
+                    
+                    if us10tempmday != "N/A":
+                        _us10(us10tempmday, us10tempbday, us10tblx_id)
+                        us10tempbday = "N/A"
+                        us10tempmday = "N/A"
                     
                     birfday = 0
 
@@ -240,10 +286,16 @@ for line in f:
 
                     # us03: checks if person died before they were born
                     tempdday = tblx_deat.split()
+                    us05tempdday = tblx_deat.split()
                     if tempbday != "N/A":
                         _us03(tempbday, tempdday, tblx_id)
                         tempbday = "N/A"
                         tempdday = "N/A"
+                        
+                    if us05tempmday != "N/A":
+                        _us05(us05tempmday, us05tempdday, tbly_id)
+                        us05tempmday = "N/A"
+                        us05tempdday = "N/A"
                     
                     deafday = 0
                     tblx_aliv = False
@@ -253,10 +305,23 @@ for line in f:
                     
                     # us04: checks if married before divorce
                     tempmday = tbly_marr.split()
+                    us05tempmday = tbly_marr.split()
+                    us10tempmday = tbly_marr.split()
+                    
                     if tempvday != "N/A":
                         _us04(tempmday, tempvday, tbly_id)
                         tempmday = "N/A"
                         tempvday = "N/A"
+                        
+                    if us05tempdday != "N/A":
+                        _us05(us05tempmday, us05tempdday, tbly_id)
+                        us05tempmday = "N/A"
+                        us05tempdday = "N/A"
+                        
+                    if us10tempbday != "N/A":
+                        _us10(us10tempmday, us10tempbday, us10tblx_id)
+                        us05tempmday = "N/A"
+                        us05tempbday = "N/A"
                     
                     marfday = 0
 
@@ -339,6 +404,7 @@ print(y.get_string(sortby = "ID"))
 print("\n")
 _us03print(us03List)
 _us04print(us04List)
-
+_us05print(us05List)
+_us10print(us10List)
 
 f.close()
