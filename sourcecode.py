@@ -38,7 +38,8 @@ name_list = []; id_list = []
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
-tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"; tempmday2 = "N/A"; tempdday2 = "N/A"
+tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"; us05tempmday = "N/A"; us05tempdday = "N/A"; us10tempbday = "N/A"; us10tempmday = "N/A"
+us10tblx_id = "N/A"
 us03List = []; us04List = []; us05List = []; us10List = []
 
 abbr_to_num = {
@@ -79,78 +80,7 @@ def _age(given_date, birthdate):
     age = given_date.year - birthdate.year - ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
 
-# sprint 1 US05 Marriage before death. Marriage can't be after death
-def _us05(mdate, ddate, id):
-    marriageMonth = abbr_to_num[mdate[1]]
-    deathMonth = abbr_to_num[ddate[1]]
-    
-    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
-    death_date = date(int(ddate[2]), deathMonth, int(ddate[0]))
-
-    age_diff = _age(marr_date, death_date)
-
-    if age_diff < 0:
-        negativeAges = [id, str(marr_date), str(death_date)]
-        us05List.append(list(negativeAges))
-        return us05List
-
-
-def _us05print(list):
-
-    for x in list:
-        print("ERROR: FAMILY: US05: " + x[0] + ": Married " + x[1] + " after death")
-
-
-# sprint 1 US10 Marriage before the age of 14
-def _us10(mdate, bdate, id):
-    marriageMonth = abbr_to_num[mdate[1]]
-    birthMonth = abbr_to_num[bdate[1]]
-    
-    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
-    birth_date = date(int(bdate[2]), birthMonth, int(bdate[0]))
-
-    age_diff = _age(marr_date, birth_date)
-
-    if age_diff < 14:
-        lessThan_14_List = [id, str(marr_date), str(birth_date)]
-        us10List.append(list(lessThan_14_List))
-        return us10List
-
-def _us10print(list):
-
-    for x in list:
-        print("ERROR: INDIVIDUAL: US10: " + x[0] + "Married " + x[1] + " before the age of 14" )
-
-
-def _us11(sndmage, divdate, id):
-    us11List = []
-    if len(sndmage) != 0:
-        snd_to_num = abbr_to_num[sndmage[1]]
-    if len(divdate) != 0:
-        div_to_num = abbr_to_num[divdate[1]]
-    if len(sndmage) != 0:
-         snd_date = date(int(sndmage[2]), snd_to_num, int(sndmage[0]))
-    if len(divdate) != 0:
-        div_date = date(int(divdate[2]), div_to_num, int(divdate[0]))
-    if len(divdate) == 0:
-        s = [id, str(snd_date), '']
-        us11List.append(list(s))
-        return us11List
-    #birth month, divorce month 
-    # yyyy-mm-dd format
-   
-    # find time difference between marriage and divorce
-    time_diff = _age(snd_date,div_date)
-    
-    if time_diff < 0:
-
-        # return INDI where the 2nd marrigage happens before divorce
-        s = [id, str(div_date), str(snd_date)]
-        us11List.append(list(s))
-    return us11List
-def _us12():
-    pass
-
+# sprint 1
 def _us03(bdate, ddate, id):
 
     # converts month name to a number
@@ -168,7 +98,6 @@ def _us03(bdate, ddate, id):
         s = [id, str(birth_date), str(death_date)]
         us03List.append(list(s))
         return us03List
-
 
 def _us03print(list):
     
@@ -198,6 +127,72 @@ def _us04print(list):
     for x in list:
         print("ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
+def _us05(mdate, ddate, id):
+    marriageMonth = abbr_to_num[mdate[1]]
+    deathMonth = abbr_to_num[ddate[1]]
+    
+    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
+    death_date = date(int(ddate[2]), deathMonth, int(ddate[0]))
+
+    age_diff = _age(marr_date, death_date)
+
+    if age_diff < 0:
+        negativeAges = [id, str(marr_date), str(death_date)]
+        us05List.append(list(negativeAges))
+        return us05List
+
+def _us05print(list):
+
+    for x in list:
+        print("ERROR: FAMILY: US05: " + x[0] + ": Married " + x[1] + " after death")
+
+def _us10(mdate, bdate, id):
+    marriageMonth = abbr_to_num[mdate[1]]
+    birthMonth = abbr_to_num[bdate[1]]
+    
+    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
+    birth_date = date(int(bdate[2]), birthMonth, int(bdate[0]))
+
+    age_diff = _age(marr_date, birth_date)
+
+    if age_diff < 14:
+        lessThan_14_List = [id, str(marr_date), str(birth_date)]
+        us10List.append(list(lessThan_14_List))
+        return us10List
+
+def _us10print(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US10: " + x[0] + " Married " + x[1] + " before the age of 14" )
+
+def _us11(sndmage, divdate, id):
+    us11List = []
+    if len(sndmage) != 0:
+        snd_to_num = abbr_to_num[sndmage[1]]
+    if len(divdate) != 0:
+        div_to_num = abbr_to_num[divdate[1]]
+    if len(sndmage) != 0:
+         snd_date = date(int(sndmage[2]), snd_to_num, int(sndmage[0]))
+    if len(divdate) != 0:
+        div_date = date(int(divdate[2]), div_to_num, int(divdate[0]))
+    if len(divdate) == 0:
+        s = [id, str(snd_date), '']
+        us11List.append(list(s))
+        return us11List
+    #birth month, divorce month 
+    # yyyy-mm-dd format
+   
+    # find time difference between marriage and divorce
+    time_diff = _age(snd_date,div_date)
+    
+    if time_diff < 0:
+
+        # return INDI where the 2nd marrigage happens before divorce
+        s = [id, str(div_date), str(snd_date)]
+        us11List.append(list(s))
+    return us11List
+def _us12():
+    pass
 
 
 for line in f:
@@ -254,10 +249,18 @@ for line in f:
 
                     # us03: checks if person died before they were born
                     tempbday = tblx_birt.split()
+                    us10tempbday = tblx_birt.split()
+                    us10tblx_id = tblx_id
+                    
                     if tempdday != "N/A":
                         _us03(tempbday, tempdday, tblx_id)
                         tempbday = "N/A"
                         tempdday = "N/A"
+                    
+                    if us10tempmday != "N/A":
+                        _us10(us10tempmday, us10tempbday, us10tblx_id)
+                        us10tempbday = "N/A"
+                        us10tempmday = "N/A"
                     
                     birfday = 0
 
@@ -266,16 +269,16 @@ for line in f:
 
                     # us03: checks if person died before they were born
                     tempdday = tblx_deat.split()
-                    tempdday2 = tblx_deat.split()
+                    us05tempdday = tblx_deat.split()
                     if tempbday != "N/A":
                         _us03(tempbday, tempdday, tblx_id)
                         tempbday = "N/A"
                         tempdday = "N/A"
                         
-                    if tempmday2 != "N/A":
-                        _us05(tempmday2, tempdday2, tbly_id)
-                        tempmday2 = "N/A"
-                        tempdday2 = "N/A"
+                    if us05tempmday != "N/A":
+                        _us05(us05tempmday, us05tempdday, tbly_id)
+                        us05tempmday = "N/A"
+                        us05tempdday = "N/A"
                     
                     deafday = 0
                     tblx_aliv = False
@@ -285,16 +288,23 @@ for line in f:
                     
                     # us04: checks if married before divorce
                     tempmday = tbly_marr.split()
-                    tempmday2 = tbly_marr.split()
+                    us05tempmday = tbly_marr.split()
+                    us10tempmday = tbly_marr.split()
+                    
                     if tempvday != "N/A":
                         _us04(tempmday, tempvday, tbly_id)
                         tempmday = "N/A"
                         tempvday = "N/A"
                         
-                    if tempdday2 != "N/A":
-                        _us05(tempmday2, tempdday2, tbly_id)
-                        tempmday2 = "N/A"
-                        tempdday2 = "N/A"
+                    if us05tempdday != "N/A":
+                        _us05(us05tempmday, us05tempdday, tbly_id)
+                        us05tempmday = "N/A"
+                        us05tempdday = "N/A"
+                        
+                    if us10tempbday != "N/A":
+                        _us10(us10tempmday, us10tempbday, us10tblx_id)
+                        us05tempmday = "N/A"
+                        us05tempbday = "N/A"
                     
                     marfday = 0
 
@@ -378,5 +388,6 @@ print("\n")
 _us03print(us03List)
 _us04print(us04List)
 _us05print(us05List)
+_us10print(us10List)
 
 f.close()
