@@ -105,8 +105,25 @@ def _us11(sndmage, divdate, id):
         s = [id, str(div_date), str(snd_date)]
         us11List.append(list(s))
     return us11List
-def _us12():
-    pass
+def _us12(mm_id,mother_birth, dd_id, father_birth, children_birth):
+    #children and parents should be less than 80 years old
+    mmn_to_num = abbr_to_num[mother_birth[1]]
+    ffn_to_num = abbr_to_num[father_birth[1]]
+    mmn_date = date(int(mother_birth[2]), mmn_to_num, int(mother_birth[0]))
+    ff_date = date(int(father_birth[2]), ffn_to_num,  int(father_birth[0]))
+    mom_age_today = _age(date.today(), mmn_date)
+    dad_age_today = _age(date.today(), ff_date)
+    if mom_age_today > 80 or dad_age_today > 80:
+        return False
+    for chil in children_birth:
+        cc_to_num = abbr_to_num[chil[1][1]]
+        cc_date = date(int(chil[1][2]), cc_to_num, int(chil[1][0]))
+        cc_age = _age(date.today(), cc_date)
+        if cc_age > 80:
+            return False
+    return True
+    
+
 
 def _us03(bdate, ddate, id):
 

@@ -1,3 +1,4 @@
+from pickle import TRUE
 import sourcecode
 import unittest
 from datetime import date
@@ -14,6 +15,14 @@ class Test_Testsourcecode(unittest.TestCase):
     def test5_us11(self):
         self.assertEqual(sourcecode._us11( ["31", "MAR", "2010"], [], "@I6@"), [['@I6@','2010-03-31' ,''] ])
         
-        
+    def test1_us12(self):
+        self.assertEqual(sourcecode._us12( '@I6@', ["31", "MAR", "1990"], '@I7@', ["30", "MAR", "1990"], [['@I8', ["30", "MAY", "2020"]]] ), True)
+    def test2_us12(self):
+        self.assertEqual(sourcecode._us12( '@I6@', ["31", "MAR", "1910"], '@I7@', ["30", "MAR", "1910"], [['@I8', ["30", "MAY", "2020"]]] ), False)
+   
+    def test3_us12(self):
+        self.assertEqual(sourcecode._us12( '@I8@', ["31", "MAR", "1955"], '@I7@', ["30", "MAR", "1970"], [['@I8', ["30", "MAY", "1990"]], ['@I9', ["30", "MAY", "1991"]]]  ), True)
+    
+    
 if __name__ == '__main__':
     unittest.main()
