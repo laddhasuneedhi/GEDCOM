@@ -105,7 +105,8 @@ def _us11(sndmage, divdate, id):
         s = [id, str(div_date), str(snd_date)]
         us11List.append(list(s))
     return us11List
-
+def _us12():
+    pass
 
 def _us03(bdate, ddate, id):
 
