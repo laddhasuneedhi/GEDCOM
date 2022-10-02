@@ -39,7 +39,7 @@ tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_a
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
 tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"
-us03List = []; us04List = []
+us03List = []; us04List = []; 
 
 abbr_to_num = {
     'JAN' : 1,
@@ -79,6 +79,34 @@ def _age(given_date, birthdate):
     age = given_date.year - birthdate.year - ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
 
+def _us11(sndmage, divdate, id):
+    us11List = []
+    if len(sndmage) != 0:
+        snd_to_num = abbr_to_num[sndmage[1]]
+    if len(divdate) != 0:
+        div_to_num = abbr_to_num[divdate[1]]
+    if len(sndmage) != 0:
+         snd_date = date(int(sndmage[2]), snd_to_num, int(sndmage[0]))
+    if len(divdate) != 0:
+        div_date = date(int(divdate[2]), div_to_num, int(divdate[0]))
+    if len(divdate) == 0:
+        s = [id, str(snd_date), '']
+        us11List.append(list(s))
+        return us11List
+    #birth month, divorce month 
+    # yyyy-mm-dd format
+   
+    # find time difference between marriage and divorce
+    time_diff = _age(snd_date,div_date)
+    
+    if time_diff < 0:
+
+        # return INDI where the 2nd marrigage happens before divorce
+        s = [id, str(div_date), str(snd_date)]
+        us11List.append(list(s))
+    return us11List
+
+
 def _us03(bdate, ddate, id):
 
     # converts month name to a number
@@ -96,6 +124,7 @@ def _us03(bdate, ddate, id):
         s = [id, str(birth_date), str(death_date)]
         us03List.append(list(s))
         return us03List
+
 
 def _us03print(list):
     
@@ -124,6 +153,8 @@ def _us04print(list):
     
     for x in list:
         print("ERROR: FAMILY: US04: ??: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
+
+
 
 for line in f:
 
