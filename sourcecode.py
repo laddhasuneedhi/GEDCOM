@@ -2,11 +2,9 @@
 # https://github.com/laddhasuneedhi/Project02.git
 # Hao Dian Li, Suneedhi Laddha, Ali El Sayed, Gigi Luna
 
-from distutils.filelist import glob_to_re
 import sys
 from prettytable import PrettyTable
-from datetime import date, datetime
-import calendar
+from datetime import date
 
 validtags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM", "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"]
 tag0 = ["INDI", "FAM", "HEAD", "TRLR", "NOTE"]
@@ -40,7 +38,7 @@ tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_a
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
 birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []; tbly_sarr = []
 tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"; us05tempmday = "N/A"; us05tempdday = "N/A"; us10tempbday = "N/A"; us10tempmday = "N/A"
-us03List = []; us04List = []; us05List = []; us10List = []
+us03List = []; us04List = []; us05List = []; us10List = []; us11List = []
 
 abbr_to_num = {'JAN' : 1, 'FEB' : 2, 'MAR' : 3, 'APR' : 4, 'MAY' : 5, 'JUN' : 6, 'JUL' : 7, 'AUG' : 8, 'SEP' : 9, 'OCT' : 10, 'NOV' : 11, 'DEC' : 12}
 
@@ -61,44 +59,6 @@ def _matchId(id):
         if (int(matchToken[0]) == 1) and (matchToken[1] == "NAME") and (gotmatch == 1): gotmatch = 0; matchFullStr = ' '.join(str(i) for i in matchStrList); return matchFullStr
     
     fcopy.close()
-
-def _corpseBride(sarr, marr, wifi, husi, fid):
-    print(sarr)
-    
-    gotmatch = 0
-    gotdeath = 0
-    death = "N/A"
-    lookupID = "N/A"
-    marr = marr.split()
-    fcopy = open(arg_1, 'r')
-
-    for line in fcopy:
-
-        matchToken = line.split() #list of the line
-        
-        if line == "\n": continue #ignore the empty lines
-        
-        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1: gotmatch = 0; gotdeath = 0
-        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])): gotmatch = 1; lookupID = matchToken[1]
-        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1): gotdeath = 1
-        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1): 
-            death = matchToken[2:]
-            month_death = abbr_to_num[death[1]]
-            month_marr = abbr_to_num[marr_split[1]]
-            age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(death[2]), month_death, int(death[0])))
-            gotmatch = 0; gotdeath = 0
-            if age_diff >= 0:
-                odeath = date(int(death[2]), month_death, int(death[0]))
-                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
-                if lookupID == wifi: s_type = "wife"
-                if lookupID == husi: s_type = "husband"
-                us05List.append([lookupID, str(odeath), str(marr_formatted), s_type, fid])
-                # return us05List
-            # else: gotmatch = 0; gotdeath = 0
-            
-    fcopy.close()
-    return us05List
-    
 
 def _age(given_date, birthdate):
 
@@ -152,6 +112,43 @@ def _us04print(list):
     for x in list:
         print("ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
+def _corpseBride(sarr, marr, wifi, husi, fid):
+    print(sarr)
+    
+    gotmatch = 0
+    gotdeath = 0
+    death = "N/A"
+    lookupID = "N/A"
+    marr = marr.split()
+    fcopy = open(arg_1, 'r')
+
+    for line in fcopy:
+
+        matchToken = line.split() #list of the line
+        
+        if line == "\n": continue #ignore the empty lines
+        
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1: gotmatch = 0; gotdeath = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])): gotmatch = 1; lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1): gotdeath = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1): 
+            death = matchToken[2:]
+            month_death = abbr_to_num[death[1]]
+            month_marr = abbr_to_num[marr_split[1]]
+            age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(death[2]), month_death, int(death[0])))
+            gotmatch = 0; gotdeath = 0
+            if age_diff >= 0:
+                odeath = date(int(death[2]), month_death, int(death[0]))
+                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
+                if lookupID == wifi: s_type = "wife"
+                if lookupID == husi: s_type = "husband"
+                us05List.append([lookupID, str(odeath), str(marr_formatted), s_type, fid])
+                # return us05List
+            # else: gotmatch = 0; gotdeath = 0
+            
+    fcopy.close()
+    return us05List
+
 def _us05print(list):
     
     for x in list:
@@ -181,7 +178,7 @@ def _us10print(list):
         print("ERROR: INDIVIDUAL: US10: " + x[0] + " Married " + x[1] + " before the age of 14" )
 
 def _us11(sndmage, divdate, id):
-    us11List = []
+
     if len(sndmage) != 0:
         snd_to_num = abbr_to_num[sndmage[1]]
     if len(divdate) != 0:
@@ -206,6 +203,7 @@ def _us11(sndmage, divdate, id):
         s = [id, str(div_date), str(snd_date)]
         us11List.append(list(s))
     return us11List
+
 def _us12(mm_id,mother_birth, dd_id, father_birth, children_birth):
     #children and parents should be less than 80 years old
     mmn_to_num = abbr_to_num[mother_birth[1]]
@@ -223,9 +221,6 @@ def _us12(mm_id,mother_birth, dd_id, father_birth, children_birth):
         if cc_age > 80:
             return False
     return True
-    
-
-
 
 for line in f:
 
