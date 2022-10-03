@@ -2,6 +2,7 @@
 # https://github.com/laddhasuneedhi/Project02.git
 # Hao Dian Li, Suneedhi Laddha, Ali El Sayed, Gigi Luna
 
+from distutils.filelist import glob_to_re
 import sys
 from prettytable import PrettyTable
 from datetime import date, datetime
@@ -37,25 +38,11 @@ name_list = []; id_list = []
 
 tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"
 tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"
-birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []
+birfday = 0; deafday = 0; todays_date = date.today(); tblx_sarr = []; tblx_carr = []; marfday = 0; divfday = 0; tbly_carr = []; tbly_sarr = []
 tempbday = "N/A"; tempdday = "N/A"; tempmday = "N/A"; tempvday = "N/A"; us05tempmday = "N/A"; us05tempdday = "N/A"; us10tempbday = "N/A"; us10tempmday = "N/A"
-us10tblx_id = "N/A"
 us03List = []; us04List = []; us05List = []; us10List = []
 
-abbr_to_num = {
-    'JAN' : 1,
-    'FEB' : 2,
-    'MAR' : 3,
-    'APR' : 4,
-    'MAY' : 5,
-    'JUN' : 6,
-    'JUL' : 7,
-    'AUG' : 8,
-    'SEP' : 9,
-    'OCT' : 10,
-    'NOV' : 11,
-    'DEC' : 12
-}
+abbr_to_num = {'JAN' : 1, 'FEB' : 2, 'MAR' : 3, 'APR' : 4, 'MAY' : 5, 'JUN' : 6, 'JUL' : 7, 'AUG' : 8, 'SEP' : 9, 'OCT' : 10, 'NOV' : 11, 'DEC' : 12}
 
 # helper functions
 def _matchId(id):
@@ -71,9 +58,47 @@ def _matchId(id):
         if line == "\n": continue #ignore the empty lines
         if (int(matchToken[0]) == 0) and (gotmatch == 1) and (matchToken[2] == "INDI" or "FAM"): return "N/A"
         if (int(matchToken[0]) == 0) and (matchToken[1] == id): gotmatch = 1
-        if (int(matchToken[0]) == 1) and (matchToken[1] == "NAME") and (gotmatch == 1): gotmatch = 0; matchFullStr = ' '.join(str(i) for i in matchStrList); return matchFullStr; print (matchFullStr)
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "NAME") and (gotmatch == 1): gotmatch = 0; matchFullStr = ' '.join(str(i) for i in matchStrList); return matchFullStr
     
     fcopy.close()
+
+def _corpseBride(sarr, marr, wifi, husi, fid):
+    print(sarr)
+    
+    gotmatch = 0
+    gotdeath = 0
+    death = "N/A"
+    lookupID = "N/A"
+    marr = marr.split()
+    fcopy = open(arg_1, 'r')
+
+    for line in fcopy:
+
+        matchToken = line.split() #list of the line
+        
+        if line == "\n": continue #ignore the empty lines
+        
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1: gotmatch = 0; gotdeath = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])): gotmatch = 1; lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1): gotdeath = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1): 
+            death = matchToken[2:]
+            month_death = abbr_to_num[death[1]]
+            month_marr = abbr_to_num[marr_split[1]]
+            age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(death[2]), month_death, int(death[0])))
+            gotmatch = 0; gotdeath = 0
+            if age_diff >= 0:
+                odeath = date(int(death[2]), month_death, int(death[0]))
+                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
+                if lookupID == wifi: s_type = "wife"
+                if lookupID == husi: s_type = "husband"
+                us05List.append([lookupID, str(odeath), str(marr_formatted), s_type, fid])
+                # return us05List
+            # else: gotmatch = 0; gotdeath = 0
+            
+    fcopy.close()
+    return us05List
+    
 
 def _age(given_date, birthdate):
 
@@ -127,25 +152,11 @@ def _us04print(list):
     for x in list:
         print("ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
-def _us05(mdate, ddate, id):
-    marriageMonth = abbr_to_num[mdate[1]]
-    deathMonth = abbr_to_num[ddate[1]]
-    
-    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
-    death_date = date(int(ddate[2]), deathMonth, int(ddate[0]))
-
-    age_diff = _age(marr_date, death_date)
-
-    if age_diff < 0:
-        negativeAges = [id, str(marr_date), str(death_date)]
-        us05List.append(list(negativeAges))
-        return us05List
-
 def _us05print(list):
-
+    
     for x in list:
-        print("ERROR: FAMILY: US05: " + x[0] + ": Married " + x[1] + " after death")
-
+        print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2], "after", x[3] + "'s (" + x[0] + ") death on", x[1])
+        
 def _us10(mdate, bdate, id):
     marriageMonth = abbr_to_num[mdate[1]]
     birthMonth = abbr_to_num[bdate[1]]
@@ -154,6 +165,10 @@ def _us10(mdate, bdate, id):
     birth_date = date(int(bdate[2]), birthMonth, int(bdate[0]))
 
     age_diff = _age(marr_date, birth_date)
+    
+    print(birth_date)
+    print(marr_date)
+    print(age_diff)
 
     if age_diff < 14:
         lessThan_14_List = [id, str(marr_date), str(birth_date)]
@@ -231,93 +246,28 @@ for line in f:
             if tok1 == "FAMC": tblx_carr.append(fullStr); tblx_chil = tblx_carr
             if tok1 == "FAMS": tblx_sarr.append(fullStr); tblx_spou = tblx_sarr
             if tok1 == "CHIL": tbly_carr.append(fullStr); tbly_chil = tbly_carr
-            if tok1 == "WIFE":
-                tbly_wifi = fullStr
-                matchName = _matchId(tbly_wifi)
-                tbly_wifn = matchName
-            if tok1 == "HUSB":
-                tbly_husi = fullStr
-                matchName = _matchId(tbly_husi)
-                tbly_husn = matchName
+            if tok1 == "WIFE": tbly_wifi = fullStr; matchName = _matchId(tbly_wifi); tbly_wifn = matchName; tbly_sarr.append(fullStr)
+            if tok1 == "HUSB": tbly_husi = fullStr; matchName = _matchId(tbly_husi); tbly_husn = matchName; tbly_sarr.append(fullStr)
 
         #level 2 tags
         elif (tok0 == 2) and (tok1 in tag2):
             if tok1 == "DATE":
 
                 if birfday == 1: 
-                    tblx_birt = fullStr
-
-                    # us03: checks if person died before they were born
-                    tempbday = tblx_birt.split()
-                    us10tempbday = tblx_birt.split()
-                    us10tblx_id = tblx_id
-                    
-                    if tempdday != "N/A":
-                        _us03(tempbday, tempdday, tblx_id)
-                        tempbday = "N/A"
-                        tempdday = "N/A"
-                    
-                    if us10tempmday != "N/A":
-                        _us10(us10tempmday, us10tempbday, us10tblx_id)
-                        us10tempbday = "N/A"
-                        us10tempmday = "N/A"
-                    
+                    tblx_birt = fullStr                    
                     birfday = 0
 
                 if deafday == 1: 
-                    tblx_deat = fullStr
-
-                    # us03: checks if person died before they were born
-                    tempdday = tblx_deat.split()
-                    us05tempdday = tblx_deat.split()
-                    if tempbday != "N/A":
-                        _us03(tempbday, tempdday, tblx_id)
-                        tempbday = "N/A"
-                        tempdday = "N/A"
-                        
-                    if us05tempmday != "N/A":
-                        _us05(us05tempmday, us05tempdday, tbly_id)
-                        us05tempmday = "N/A"
-                        us05tempdday = "N/A"
-                    
+                    tblx_deat = fullStr                    
                     deafday = 0
                     tblx_aliv = False
 
                 if marfday == 1: 
-                    tbly_marr = fullStr
-                    
-                    # us04: checks if married before divorce
-                    tempmday = tbly_marr.split()
-                    us05tempmday = tbly_marr.split()
-                    us10tempmday = tbly_marr.split()
-                    
-                    if tempvday != "N/A":
-                        _us04(tempmday, tempvday, tbly_id)
-                        tempmday = "N/A"
-                        tempvday = "N/A"
-                        
-                    if us05tempdday != "N/A":
-                        _us05(us05tempmday, us05tempdday, tbly_id)
-                        us05tempmday = "N/A"
-                        us05tempdday = "N/A"
-                        
-                    if us10tempbday != "N/A":
-                        _us10(us10tempmday, us10tempbday, us10tblx_id)
-                        us05tempmday = "N/A"
-                        us05tempbday = "N/A"
-                    
+                    tbly_marr = fullStr                    
                     marfday = 0
 
                 if divfday == 1:
                     tbly_divo = fullStr
-
-                    # us04: checks if married before divorce
-                    tempvday = tbly_divo.split()
-                    if tempmday != "N/A":
-                        _us04(tempmday, tempvday, tbly_id)
-                        tempmday = "N/A"
-                        tempvday = "N/A"
-
                     divfday = 0
     
     else: #check if third token is a valid tag   ex: INDI or FAM
@@ -340,9 +290,11 @@ for line in f:
                     elif tblx_aliv == False:
                         dmn_to_num = abbr_to_num[death_split[1]]
                         tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
-                    # if tblx_aliv == True: tblx_age = todays_date.year - int(birth_split[2])
-                    # elif tblx_aliv == False: tblx_age = int(death_split[2]) - int(birth_split[2])
-
+                    
+                    # call INDI story functions here
+                    if tblx_deat != "N/A":
+                        _us03(birth_split, death_split, tblx_id)
+                        
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
                     tblx_id = "N/A"; tblx_name = "N/A"; tblx_gend = "N/A"; tblx_birt = "N/A"; tblx_age = "N/A"; tblx_aliv = "N/A"; tblx_deat = "N/A"; tblx_chil = "N/A"; tblx_spou = "N/A"; tblx_carr = []; tblx_sarr = []
                     tblx_id = tok1
@@ -352,11 +304,21 @@ for line in f:
 
                     tblx_id = tok1
                     tblx_aliv = True
-
+            
             if tok2 == "FAM":
+                
+                marr_split = tbly_marr.split()
+                divo_split = tbly_divo.split()
+                
                 if tbly_id != "N/A":
+                    # call FAM story functions here
+                    if tbly_divo != "N/A":
+                        _us04(marr_split, divo_split, tbly_id)
+                        
+                    if tbly_marr != "N/A": _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+                        
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
-                    tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"; tbly_carr = []
+                    tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"; tbly_carr = []; tbly_sarr = []
                     tbly_id = tok1
 
                 elif tbly_id == "N/A":
@@ -369,15 +331,24 @@ for line in f:
 today = date.today()
 birth_split = tblx_birt.split()
 death_split = tblx_deat.split()
+marr_split = tbly_marr.split()
+divo_split = tbly_divo.split()
 bmn_to_num = abbr_to_num[birth_split[1]]
+
 if tblx_aliv == True: tblx_age = _age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
 elif tblx_aliv == False:
     dmn_to_num = abbr_to_num[death_split[1]]
     tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
 
+# call ALL story functions here
+if tblx_deat != "N/A":
+    _us03(birth_split, death_split, tblx_id)
+if tbly_divo != "N/A":
+    _us04(marr_split, divo_split, tbly_id)
+if tbly_marr != "N/A": _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
-
 
 print("Individuals")
 print(x.get_string(sortby = "ID"))
