@@ -154,28 +154,47 @@ def _us05print(list):
     for x in list:
         print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2], "after", x[3] + "'s (" + x[0] + ") death on", x[1])
         
-def _us10(mdate, bdate, id):
-    marriageMonth = abbr_to_num[mdate[1]]
-    birthMonth = abbr_to_num[bdate[1]]
+def _us10(sarr, marr, wifi, husi, fid):
+    print(sarr)
     
-    marr_date = date(int(mdate[2]), marriageMonth, int(mdate[0]))
-    birth_date = date(int(bdate[2]), birthMonth, int(bdate[0]))
+    gotmatch = 0
+    gotbirth = 0
+    birth = "N/A"
+    lookupID = "N/A"
+    marr = marr.split()
+    fcopy = open(arg_1, 'r')
 
-    age_diff = _age(marr_date, birth_date)
-    
-    print(birth_date)
-    print(marr_date)
-    print(age_diff)
+    for line in fcopy:
 
-    if age_diff < 14:
-        lessThan_14_List = [id, str(marr_date), str(birth_date)]
-        us10List.append(list(lessThan_14_List))
-        return us10List
+        matchToken = line.split() #list of the line
+        
+        if line == "\n": continue #ignore the empty lines
+        
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1: gotmatch = 0; gotbirth = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])): gotmatch = 1; lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "BIRT") and (gotmatch == 1): gotbirth = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotbirth == 1): 
+            birth = matchToken[2:]
+            month_birth = abbr_to_num[birth[1]]
+            month_marr = abbr_to_num[marr_split[1]]
+            age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(birth[2]), month_birth, int(birth[0])))
+            gotmatch = 0; gotbirth = 0
+            if age_diff < 14:
+                obirth = date(int(birth[2]), month_birth, int(birth[0]))
+                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
+                if lookupID == wifi: s_type = "wife"
+                if lookupID == husi: s_type = "husband"
+                us10List.append([lookupID, str(obirth), str(marr_formatted), s_type, fid])
+                # return us05List
+            # else: gotmatch = 0; gotdeath = 0
+            
+    fcopy.close()
+    return us10List
 
 def _us10print(list):
 
     for x in list:
-        print("ERROR: INDIVIDUAL: US10: " + x[0] + " Married " + x[1] + " before the age of 14" )
+        print("ERROR: INDIVIDUAL: US10: " + x[0] + " Married " + x[1] + " " + x[3] + " (Family: " + x[4] +") has to be at least 14 to get married")
 
 def _us11(sndmage, divdate, id):
 
@@ -327,7 +346,9 @@ for line in f:
                     if tbly_divo != "N/A":
                         _us04(marr_split, divo_split, tbly_id)
                         
-                    if tbly_marr != "N/A": _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+                    if tbly_marr != "N/A": 
+                        _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id) 
+                        _us10(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
                         
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
                     tbly_id = "N/A"; tbly_marr = "N/A"; tbly_divo = "N/A"; tbly_husi = "N/A"; tbly_husn = "N/A"; tbly_wifi = "N/A"; tbly_wifn = "N/A"; tbly_chil = "N/A"; tbly_carr = []; tbly_sarr = []
@@ -357,7 +378,9 @@ if tblx_deat != "N/A":
     _us03(birth_split, death_split, tblx_id)
 if tbly_divo != "N/A":
     _us04(marr_split, divo_split, tbly_id)
-if tbly_marr != "N/A": _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+if tbly_marr != "N/A": 
+    _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+    _us10(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
 
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi, tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
