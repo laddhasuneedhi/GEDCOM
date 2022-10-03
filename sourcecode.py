@@ -113,7 +113,7 @@ def _us04print(list):
         print("ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
-    print(sarr)
+    # print(sarr)
     
     gotmatch = 0
     gotdeath = 0
@@ -155,7 +155,7 @@ def _us05print(list):
         print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2], "after", x[3] + "'s (" + x[0] + ") death on", x[1])
         
 def _us10(sarr, marr, wifi, husi, fid):
-    print(sarr)
+    # print(sarr)
     
     gotmatch = 0
     gotbirth = 0
