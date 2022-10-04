@@ -175,7 +175,7 @@ def _us04print(list):
 
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
-    print(sarr)
+    # print(sarr)
 
     gotmatch = 0
     gotdeath = 0
@@ -231,7 +231,7 @@ def _us05print(list):
 
 
 def _us10(sarr, marr, wifi, husi, fid):
-    print(sarr)
+    # print(sarr)
 
     gotmatch = 0
     gotbirth = 0
