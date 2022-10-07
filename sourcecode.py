@@ -78,6 +78,7 @@ us10tempmday = "N/A"
 us03List = []
 us04List = []
 us05List = []
+us06List = []
 us10List = []
 us11List = []
 us36List = []
@@ -230,6 +231,60 @@ def _us05print(list):
               "after", x[3] + "'s (" + x[0] + ") death on", x[1])
 
 
+def _us06(sarr, div, wifi, husi, fid):
+    # print(sarr)
+
+    gotmatch = 0
+    gotdeath = 0
+    death = "N/A"
+    lookupID = "N/A"
+    div = div.split()
+    fcopy = open(arg_1, 'r')
+
+    for line in fcopy:
+
+        matchToken = line.split()  # list of the line
+
+        if line == "\n":
+            continue  # ignore the empty lines
+
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1:
+            gotmatch = 0
+            gotdeath = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])):
+            gotmatch = 1
+            lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1):
+            gotdeath = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1):
+            death = matchToken[2:]
+            month_death = abbr_to_num[death[1]]
+            month_div = abbr_to_num[divo_split[1]]
+            age_diff = _age(date(int(divo_split[2]), month_div, int(divo_split[0])), date(int(death[2]), month_death, int(death[0])))
+            gotmatch = 0
+            gotdeath = 0
+            if age_diff >= 0:
+                odeath = date(int(death[2]), month_death, int(death[0]))
+                div_formatted = date(int(div[2]), month_div, int(div[0]))
+                if lookupID == wifi:
+                    s_type = "wife"
+                if lookupID == husi:
+                    s_type = "husband"
+                us06List.append(
+                    [lookupID, str(odeath), str(div_formatted), s_type, fid])
+                # return us06List
+            # else: gotmatch = 0; gotdeath = 0
+
+    fcopy.close()
+    return us06List
+
+
+def _us06print(list):
+
+    for x in list:
+        print("ERROR: FAMILY: US06:", x[4] + ": Divorced", x[2],
+              "after", x[3] + "'s (" + x[0] + ") death on", x[1])
+
 def _us10(sarr, marr, wifi, husi, fid):
     # print(sarr)
 
@@ -359,23 +414,23 @@ def _us36print(list):
     print("ERROR:  INDIVIDUAL: US36: Death is more than 30 days")
 
 
-def _us28(bdate, id, l):
-    bmn_to_num = abbr_to_num[bdate[1]]
+# def _us28(bdate, id, l):
+#     bmn_to_num = abbr_to_num[bdate[1]]
 
-    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+#     birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
 
-    l = [{'@I6@:' 'Gordan Ramsley', 'birth:' '2007-3-1'},
-         {'@I7@:' 'Morgan Ramsley',  'birth:' '2008-4-1'},
-         {'@I8:' 'Rose Chang', 'birth:' '2008-3-21'},
-         {'@I9:' 'Astrid Chang', 'birth:' '2008-3-21'}]
+#     l = [{'@I6@:' 'Gordan Ramsley', 'birth:' '2007-3-1'},
+#          {'@I7@:' 'Morgan Ramsley',  'birth:' '2008-4-1'},
+#          {'@I8:' 'Rose Chang', 'birth:' '2008-3-21'},
+#          {'@I9:' 'Astrid Chang', 'birth:' '2008-3-21'}]
 
-    print("ERROR: FAMILY: US28: " + l)
+#     print("ERROR: FAMILY: US28: " + l)
 
 
-def _us28print(list):
+# def _us28print(list):
 
-    for x in list:
-        print("Error:Individual:US28:" + x[1])
+#     for x in list:
+#         print("Error:Individual:US28:" + x[1])
 
 
 for line in f:
@@ -519,6 +574,7 @@ for line in f:
                     # call FAM story functions here
                     if tbly_divo != "N/A":
                         _us04(marr_split, divo_split, tbly_id)
+                        _us06(tbly_sarr, tbly_divo, tbly_wifi, tbly_husi, tbly_id)
 
                     if tbly_marr != "N/A":
                         _corpseBride(tbly_sarr, tbly_marr,
@@ -567,6 +623,7 @@ if tblx_deat != "N/A":
     _us03(birth_split, death_split, tblx_id)
 if tbly_divo != "N/A":
     _us04(marr_split, divo_split, tbly_id)
+    _us06(tbly_sarr, tbly_divo, tbly_wifi, tbly_husi, tbly_id)
 if tbly_marr != "N/A":
     _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
     _us10(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
@@ -585,9 +642,10 @@ print("\n")
 _us03print(us03List)
 _us04print(us04List)
 _us05print(us05List)
+_us06print(us06List)
 _us10print(us10List)
 _us36print(us36List)
-_us28print(us28List)
+# _us28print(us28List)
 
 
 f.close()
