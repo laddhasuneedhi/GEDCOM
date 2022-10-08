@@ -81,6 +81,7 @@ us05List = []
 us10List = []
 us11List = []
 us36List = []
+us27List = []
 us28List = []
 
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
@@ -118,8 +119,6 @@ def _age(given_date, birthdate):
     age = given_date.year - birthdate.year - \
         ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
-
-# sprint 1
 
 
 def _us03(bdate, ddate, id):
@@ -333,6 +332,25 @@ def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
     return True
 
 
+def _us28(bdate, id, l):
+    bmn_to_num = abbr_to_num[bdate[1]]
+
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+
+    l = [{'@I6@:' 'Gordan Ramsley', 'birth:' '2007-3-1'},
+         {'@I7@:' 'Morgan Ramsley',  'birth:' '2008-4-1'},
+         {'@I8:' 'Rose Chang', 'birth:' '2008-3-21'},
+         {'@I9:' 'Astrid Chang', 'birth:' '2008-3-21'}]
+
+    print("ERROR: FAMILY: US28: " + l)
+
+
+def _us28print(list):
+
+    for x in list:
+        print("Error:Individual:US28:" + x[1])
+
+
 def _us36(ddate, id):
 
     dmn_to_num = abbr_to_num[ddate[1]]
@@ -359,24 +377,34 @@ def _us36print(list):
     print("ERROR:  INDIVIDUAL: US36: Death is more than 30 days")
 
 
-def _us28(bdate, id, l):
+def _us27(bdate, ddate, tdate, id, name):
+    
     bmn_to_num = abbr_to_num[bdate[1]]
+    
+    if tdate == 0:
+        # converts month name to a number
+        dmn_to_num = abbr_to_num[ddate[1]]
+        # yyyy-mm-dd format
+        birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+        given_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
+        
+        age_diff = _age(given_date, birth_date)
+        
+    elif ddate == 0:
+        # yyyy-mm-dd format
+        birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+        given_date = date(int(tdate[0]), int(tdate[1]), int(tdate[2]))
+        
+        age_diff = _age(given_date, birth_date)
+    
+    s = [id, name, str(age_diff)]
+    us27List.append(list(s))
+    return us27List
 
-    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
-
-    l = [{'@I6@:' 'Gordan Ramsley', 'birth:' '2007-3-1'},
-         {'@I7@:' 'Morgan Ramsley',  'birth:' '2008-4-1'},
-         {'@I8:' 'Rose Chang', 'birth:' '2008-3-21'},
-         {'@I9:' 'Astrid Chang', 'birth:' '2008-3-21'}]
-
-    print("ERROR: FAMILY: US28: " + l)
-
-
-def _us28print(list):
-
+def _us27print(list):
+    
     for x in list:
-        print("Error:Individual:US28:" + x[1])
-
+        print("LIST: INDIVIDUAL: US27:", x[0] + ":", x[1] + ":", x[2], "years old")
 
 for line in f:
 
@@ -473,6 +501,7 @@ for line in f:
 
                     # calculate accurate ages
                     today = date.today()
+                    today_split = str(today).split("-")
                     birth_split = tblx_birt.split()
                     death_split = tblx_deat.split()
                     # convert month name to number  ex: May -> 5
@@ -488,6 +517,9 @@ for line in f:
                     # call INDI story functions here
                     if tblx_deat != "N/A":
                         _us03(birth_split, death_split, tblx_id)
+                        _us27(birth_split, death_split, 0, tblx_id, tblx_name)
+                    if tblx_deat == "N/A":
+                        _us27(birth_split, 0, today_split, tblx_id, tblx_name)
 
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt,
                               tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
@@ -565,6 +597,9 @@ elif tblx_aliv == False:
 # call ALL story functions here
 if tblx_deat != "N/A":
     _us03(birth_split, death_split, tblx_id)
+    _us27(birth_split, death_split, 0, tblx_id, tblx_name)
+if tblx_deat == "N/A":
+    _us27(birth_split, 0, today_split, tblx_id, tblx_name)
 if tbly_divo != "N/A":
     _us04(marr_split, divo_split, tbly_id)
 if tbly_marr != "N/A":
@@ -587,7 +622,7 @@ _us04print(us04List)
 _us05print(us05List)
 _us10print(us10List)
 _us36print(us36List)
+_us27print(us27List)
 _us28print(us28List)
-
 
 f.close()
