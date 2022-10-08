@@ -79,9 +79,9 @@ us03List = []
 us04List = []
 us05List = []
 us10List = []
-us11List = []
 us36List = []
 us28List = []
+
 
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
@@ -173,6 +173,13 @@ def _us04print(list):
         print("ERROR: FAMILY: US04: " +
               x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
+#this was implemented by Suneedhi Laddha and Hao Dian Li
+def _us09(fam_id, list_of_kids):
+    if len(list_of_kids) > 15:
+        print("for fam:", fam_id, "children is greater than 15")
+        return False
+    else:
+        return True
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
     print(sarr)
@@ -287,6 +294,7 @@ def _us10print(list):
 
 
 def _us11(sndmage, divdate, id):
+    us11List = []
 
     if len(sndmage) != 0:
         snd_to_num = abbr_to_num[sndmage[1]]
@@ -312,6 +320,7 @@ def _us11(sndmage, divdate, id):
         s = [id, str(div_date), str(snd_date)]
         us11List.append(list(s))
     return us11List
+
 
 
 def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
@@ -349,6 +358,7 @@ def _us36(ddate, id):
         s = [id, str(death_date)]
         us36List.append(list(s))
         return us36List
+
 
 
 def _us36print(list):
@@ -428,6 +438,9 @@ for line in f:
             if tok1 == "CHIL":
                 tbly_carr.append(fullStr)
                 tbly_chil = tbly_carr
+                #old_val = fam_id_kids[tbly_id]
+                #new_val = old_val + 1
+                #fam_id_kids[tbly_id] = new_val
             if tok1 == "WIFE":
                 tbly_wifi = fullStr
                 matchName = _matchId(tbly_wifi)
@@ -438,6 +451,8 @@ for line in f:
                 matchName = _matchId(tbly_husi)
                 tbly_husn = matchName
                 tbly_sarr.append(fullStr)
+            
+            
 
         # level 2 tags
         elif (tok0 == 2) and (tok1 in tag2):
@@ -511,11 +526,13 @@ for line in f:
                     tblx_aliv = True
 
             if tok2 == "FAM":
+                
 
                 marr_split = tbly_marr.split()
                 divo_split = tbly_divo.split()
 
                 if tbly_id != "N/A":
+
                     # call FAM story functions here
                     if tbly_divo != "N/A":
                         _us04(marr_split, divo_split, tbly_id)
@@ -525,9 +542,14 @@ for line in f:
                                      tbly_wifi, tbly_husi, tbly_id)
                         _us10(tbly_sarr, tbly_marr,
                               tbly_wifi, tbly_husi, tbly_id)
+                    
+                    _us09(tbly_id, tbly_chil)
 
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
                               tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
+                   #_us09(tbly_id,tbly_carr)
+                    #print(tbly_carr)
+                   
                     tbly_id = "N/A"
                     tbly_marr = "N/A"
                     tbly_divo = "N/A"
@@ -542,6 +564,7 @@ for line in f:
 
                 elif tbly_id == "N/A":
                     tbly_id = tok1
+                   
 
         else:
             continue
