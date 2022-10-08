@@ -75,6 +75,7 @@ us05tempmday = "N/A"
 us05tempdday = "N/A"
 us10tempbday = "N/A"
 us10tempmday = "N/A"
+deadList = []
 us03List = []
 us04List = []
 us05List = []
@@ -88,7 +89,6 @@ abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
 # helper functions
-
 
 def _matchId(id):
 
@@ -401,10 +401,24 @@ def _us27(bdate, ddate, tdate, id, name):
     us27List.append(list(s))
     return us27List
 
+
 def _us27print(list):
     
     for x in list:
         print("LIST: INDIVIDUAL: US27:", x[0] + ":", x[1] + ":", x[2], "years old")
+
+
+def _us29(id, name):
+    
+    s = [id, name]
+    deadList.append(s)
+
+
+def _us29print(list):
+    
+    for x in list:
+        print("LIST: INDIVIDUAL: US29:", x[0] + ":", x[1])
+
 
 for line in f:
 
@@ -518,6 +532,7 @@ for line in f:
                     if tblx_deat != "N/A":
                         _us03(birth_split, death_split, tblx_id)
                         _us27(birth_split, death_split, 0, tblx_id, tblx_name)
+                        _us29(tblx_id, tblx_name)
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
 
@@ -624,5 +639,6 @@ _us10print(us10List)
 _us36print(us36List)
 _us27print(us27List)
 _us28print(us28List)
+_us29print(deadList)
 
 f.close()
