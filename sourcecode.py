@@ -664,8 +664,5 @@ _us27print(us27List)
 _us28print(us28List)
 _us29print(deadList)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 8315f19c6db35ad4a8c8be93642167d92c16fbc0
 f.close()
