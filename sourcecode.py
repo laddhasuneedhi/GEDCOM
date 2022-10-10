@@ -34,7 +34,7 @@ x.field_names = ["ID", "Name", "Gender", "Birthday",
                  "Age", "Alive", "Death", "Child", "Spouse"]
 y.field_names = ["ID", "Married", "Divorced", "Husband ID",
                  "Husband Name", "Wife ID", "Wife Name", "Children"]
-
+kids_born = {}
 birfday = 0
 deafday = 0
 todays_date = date.today()
@@ -120,6 +120,17 @@ def _age(given_date, birthdate):
         ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
 
+def _us09(husid, wifid, chilist):
+    dad_age = kids_born[husid]
+    mom_age = kids_born[wifid]
+    dad_age = int((dad_age.split())[2])
+    mom_age = int((mom_age.split())[2])
+    for x in chilist:
+        kid_age = kids_born[x]
+        kid_age = int((kid_age.split())[2])
+        if (mom_age - kid_age) > 0 or (dad_age - kid_age) > 0:
+            return False
+    return True
 
 def _us03(bdate, ddate, id):
 
@@ -173,7 +184,7 @@ def _us04print(list):
               x[0] + ": Divorced " + x[2] + " before married " + x[1])
 
 #this was implemented by Suneedhi Laddha and Hao Dian Li
-def _us09(fam_id, list_of_kids):
+def _us15(fam_id, list_of_kids):
     if len(list_of_kids) > 15:
         print("for fam:", fam_id, "children is greater than 15")
         return False
@@ -550,6 +561,7 @@ for line in f:
                         _us29(tblx_id, tblx_name)
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
+                    kids_born[tblx_id] = tblx_birt
 
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt,
                               tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
@@ -590,7 +602,8 @@ for line in f:
                         _us10(tbly_sarr, tbly_marr,
                               tbly_wifi, tbly_husi, tbly_id)
                     
-                    _us09(tbly_id, tbly_chil)
+                    _us15(tbly_id, tbly_chil)
+                    _us09(tbly_husi, tbly_wifi, tbly_chil)
 
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
                               tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
@@ -646,6 +659,7 @@ if tbly_marr != "N/A":
 
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age,
           tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
+_us15(tbly_id, tbly_chil)
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
           tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
 
@@ -663,6 +677,5 @@ _us36print(us36List)
 _us27print(us27List)
 _us28print(us28List)
 _us29print(deadList)
-
 
 f.close()
