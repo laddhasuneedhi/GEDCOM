@@ -79,6 +79,9 @@ deadList = []
 us03List = []
 us04List = []
 us05List = []
+us06List = []
+us07ListA = []
+us07ListB = []
 us10List = []
 us36List = []
 us27List = []
@@ -87,6 +90,9 @@ us28List = []
 
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
+
+abbr_to_strMonth = {'1' : 'JAN', '2' : 'FEB', '3' : 'MAR', '4' : 'APR', '5':'MAY', '6':'JUN'
+,'7' : 'JUL','8' : 'AUG','9' : 'SEP','10' : 'OCT','11' : 'NOV','12' : 'DEC'}
 
 # helper functions
 
@@ -182,6 +188,109 @@ def _us04print(list):
     for x in list:
         print("ERROR: FAMILY: US04: " +
               x[0] + ": Divorced " + x[2] + " before married " + x[1])
+
+def _us06(sarr, div, wifi, husi, fid):
+    # print(sarr)
+
+    gotmatch = 0
+    gotdeath = 0
+    death = "N/A"
+    lookupID = "N/A"
+    div = div.split()
+    fcopy = open(arg_1, 'r')
+
+    for line in fcopy:
+
+        matchToken = line.split()  # list of the line
+
+        if line == "\n":
+            continue  # ignore the empty lines
+
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1:
+            gotmatch = 0
+            gotdeath = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])):
+            gotmatch = 1
+            lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1):
+            gotdeath = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1):
+            death = matchToken[2:]
+            month_death = abbr_to_num[death[1]]
+            month_div = abbr_to_num[divo_split[1]]
+            age_diff = _age(date(int(divo_split[2]), month_div, int(divo_split[0])), date(int(death[2]), month_death, int(death[0])))
+            gotmatch = 0
+            gotdeath = 0
+            if age_diff >= 0:
+                odeath = date(int(death[2]), month_death, int(death[0]))
+                div_formatted = date(int(div[2]), month_div, int(div[0]))
+                if lookupID == wifi:
+                    s_type = "wife"
+                if lookupID == husi:
+                    s_type = "husband"
+                us06List.append(
+                    [lookupID, str(odeath), str(div_formatted), s_type, fid])
+                # return us06List
+            # else: gotmatch = 0; gotdeath = 0
+
+    fcopy.close()
+    return us06List
+
+
+def _us06print(list):
+
+    for x in list:
+        print("ERROR: FAMILY: US06:", x[4] + ": Divorced", x[2],
+              "after", x[3] + "'s (" + x[0] + ") death on", x[1])
+
+def _us07a(bdate, ddate, id):
+
+    # converts month name to a number
+    bmn_to_num = abbr_to_num[bdate[1]]
+    dmn_to_num = abbr_to_num[ddate[1]]
+    # yyyy-mm-dd format
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
+    # find age difference
+    age_diff = _age(death_date, birth_date)
+
+    if age_diff >= 150:
+
+        s = [id, str(birth_date), str(death_date)]
+        us07ListA.append(list(s))
+        return us07ListA
+
+
+def _us07Aprint(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US07: " +
+              x[0] + " Death should less than 150 years")
+
+
+def _us07b(bdate, tdate, id):
+
+    bmn_to_num = abbr_to_num[bdate[1]]
+    tmn_to_num = abbr_to_num[abbr_to_strMonth[tdate[1]]]
+    # yyyy-mm-dd format
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+    todaydate = date(int(tdate[0]), tmn_to_num, int(tdate[2]))
+
+    diff = _age(todaydate, birth_date)
+
+    if diff >= 150:
+
+        s = [id, str(birth_date)]
+        us07ListB.append(list(s))
+        return us07ListB
+
+
+
+def _us07bprint(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US07: " +
+              x[0] + " Current Date should be less than 150 years after birth")
 
 #this was implemented by Suneedhi Laddha and Hao Dian Li
 def _us15(fam_id, list_of_kids):
@@ -559,8 +668,10 @@ for line in f:
                         _us03(birth_split, death_split, tblx_id)
                         _us27(birth_split, death_split, 0, tblx_id, tblx_name)
                         _us29(tblx_id, tblx_name)
+                        _us07a(birth_split, death_split, tblx_id)
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
+                        _us07b(birth_split,today_split ,tblx_id)
                     kids_born[tblx_id] = tblx_birt
 
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt,
@@ -595,7 +706,7 @@ for line in f:
                     # call FAM story functions here
                     if tbly_divo != "N/A":
                         _us04(marr_split, divo_split, tbly_id)
-
+                        _us06(tbly_sarr, tbly_divo, tbly_wifi, tbly_husi, tbly_id)
                     if tbly_marr != "N/A":
                         _corpseBride(tbly_sarr, tbly_marr,
                                      tbly_wifi, tbly_husi, tbly_id)
