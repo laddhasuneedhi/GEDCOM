@@ -214,6 +214,7 @@ def _us04print(list):
 def _us06(sarr, div, wifi, husi, fid):
     # print(sarr)
 
+    age_diff = -1
     gotmatch = 0
     gotdeath = 0
     death = "N/A"
@@ -240,7 +241,20 @@ def _us06(sarr, div, wifi, husi, fid):
             death = matchToken[2:]
             month_death = abbr_to_num[death[1]]
             month_div = abbr_to_num[divo_split[1]]
-            age_diff = _age(date(int(divo_split[2]), month_div, int(divo_split[0])), date(int(death[2]), month_death, int(death[0])))
+            if _us42(int(divo_split[2]), month_div, int(divo_split[0])):
+                if _us42(int(death[2]), month_death, int(death[0])):
+                    age_diff = _age(date(int(divo_split[2]), month_div, int(divo_split[0])), date(int(death[2]), month_death, int(death[0])))
+                else: 
+                    s = [fid, 2, int(death[2]), month_death, int(death[0])]
+                    if s in us42List:
+                        pass
+                    else: us42List.append(s)
+            else:
+                s = [fid, 3, int(divo_split[2]), month_div, int(divo_split[0])]
+                if s in us42List:
+                    pass
+                else:
+                    us42List.append(s)
             gotmatch = 0
             gotdeath = 0
             if age_diff >= 0:
@@ -813,9 +827,27 @@ for line in f:
                             
                     # call INDI story functions here
                     if tblx_deat != "N/A":
-                        _us03(birth_split, death_split, tblx_id)
-                        _us27(birth_split, death_split, 0, tblx_id, tblx_name)
-                        _us29(tblx_id, tblx_name)
+                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
+                            dmn_to_num = abbr_to_num[death_split[1]]
+                            if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
+                                _us03(birth_split, death_split, tblx_id)
+                                _us27(birth_split, death_split, 0, tblx_id, tblx_name)
+                                _us29(tblx_id, tblx_name)
+                            else: 
+                                s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
+                                if s in us42List:
+                                    pass
+                                else:
+                                    us42List.append(s)
+                        else: 
+                            s = [tblx_id , 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
+                            if s in us42List:
+                                pass
+                            else:
+                                us42List.append(s)
+                        # _us03(birth_split, death_split, tblx_id)
+                        # _us27(birth_split, death_split, 0, tblx_id, tblx_name)
+                        # _us29(tblx_id, tblx_name)
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
 
