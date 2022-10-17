@@ -536,10 +536,6 @@ def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
     return True
 
 
-# def _us22(id):
-#     us22Rep.append(id)
-
-
 def _us22print(list):
     
     for x in list:
@@ -887,11 +883,6 @@ for line in f:
 
                 elif tblx_id == "N/A":
                     tblx_id = tok1
-                    # check for unique INDI IDs
-                    # if (tblx_id in us22List) and (tblx_id not in us22Rep):
-                    #     us22Rep.append(tblx_id)
-                    # if tblx_id not in us22List:
-                    #     us22List.append(tblx_id)
                     tblx_aliv = True
 
             if tok2 == "FAM":            
@@ -936,11 +927,6 @@ for line in f:
 
                 elif tbly_id == "N/A":
                     tbly_id = tok1
-                    # check for unique INDI IDs
-                    # if (tbly_id in us22List) and (tbly_id not in us22Rep):
-                    #     us22Rep.append(tbly_id)
-                    # if tbly_id not in us22List:
-                    #     us22List.append(tbly_id)
 
         else:
             continue
