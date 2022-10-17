@@ -374,7 +374,7 @@ def _us07Aprint(list):
 
     for x in list:
         print("ERROR: INDIVIDUAL: US07: " +
-              x[0] + " Death should less than 150 years")
+              x[0] + " Death should be less than 150 years after birth")
 
 
 def _us07b(bdate, tdate, id):
