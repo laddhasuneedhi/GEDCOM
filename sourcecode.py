@@ -169,8 +169,8 @@ def _us03print(list):
 
 def _us04(mdate, vdate, id):
     
-    marr_date = -1
-    divo_date = -1
+    marr_date = None
+    divo_date = None
     year_status = False
 
     # converts month name to a number
@@ -195,7 +195,7 @@ def _us04(mdate, vdate, id):
         else:
             us42List.append(s)
     # find age difference
-    if (marr_date != -1) and (divo_date != -1):
+    if (marr_date != None) and (divo_date != None):
         year_diff = _age(divo_date, marr_date)
         year_status = True
 
@@ -281,6 +281,7 @@ def _us06print(list):
         print("ERROR: FAMILY: US06:", x[4] + ": Divorced", x[2],
               "after", x[3] + "'s (" + x[0] + ") death on", x[1])
 
+
 def _us07a(bdate, ddate, id):
 
     # converts month name to a number
@@ -323,12 +324,12 @@ def _us07b(bdate, tdate, id):
         return us07ListB
 
 
-
 def _us07bprint(list):
 
     for x in list:
         print("ERROR: INDIVIDUAL: US07: " +
               x[0] + " Current Date should be less than 150 years after birth")
+
 
 #this was implemented by Suneedhi Laddha and Hao Dian Li
 def _us15(fam_id, list_of_kids):
@@ -337,6 +338,7 @@ def _us15(fam_id, list_of_kids):
         return False
     else:
         return True
+
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
     # print(sarr)
@@ -516,7 +518,6 @@ def _us11(sndmage, divdate, id):
     return us11List
 
 
-
 def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
     # children and parents should be less than 80 years old
     mmn_to_num = abbr_to_num[mother_birth[1]]
@@ -582,7 +583,6 @@ def _us36(ddate, id):
         return us36List
 
 
-
 def _us36print(list):
 
     for x in list:
@@ -593,9 +593,9 @@ def _us36print(list):
 
 def _us27(bdate, ddate, tdate, id, name):
     
-    birth_date = -1
-    given_date = -1
-    age_diff = -1
+    birth_date = None
+    given_date = None
+    age_diff = None
     bmn_to_num = abbr_to_num[bdate[1]]
     
     if tdate == 0:
@@ -606,20 +606,16 @@ def _us27(bdate, ddate, tdate, id, name):
             birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
         else:
             s = [id, 0, int(bdate[2]), bmn_to_num, int(bdate[0])]
-            if s in us42List:
-                pass
-            else:
+            if s not in us42List:
                 us42List.append(s)
         if _us42(int(bdate[2]), bmn_to_num, int(bdate[0])):
             given_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
         else:
             s = [id, 0, int(ddate[2]), dmn_to_num, int(ddate[0])]
-            if s in us42List:
-                pass
-            else:
+            if s not in us42List:
                 us42List.append(s)
         
-        if (birth_date != -1) and (given_date != -1): 
+        if (birth_date != None) and (given_date != None): 
             age_diff = _age(given_date, birth_date)
         
     elif ddate == 0:
@@ -628,25 +624,21 @@ def _us27(bdate, ddate, tdate, id, name):
             birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
         else:
             s = [id, 0, int(bdate[2]), bmn_to_num, int(bdate[0])]
-            if s in us42List:
-                pass
-            else:
+            if s not in us42List:
                 us42List.append(s)
         if _us42(int(tdate[0]), int(tdate[1]), int(tdate[2])):
             given_date = date(int(tdate[0]), int(tdate[1]), int(tdate[2]))
         else:
             s = [id, 0, int(tdate[0]), int(tdate[1]), int(tdate[2])]
-            if s in us42List:
-                pass
-            else:
+            if s not in us42List:
                 us42List.append(s)
         # birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
         # given_date = date(int(tdate[0]), int(tdate[1]), int(tdate[2]))
         
-        if (birth_date != -1) and (given_date != -1): 
+        if (birth_date != None) and (given_date != None): 
             age_diff = _age(given_date, birth_date)
     
-    if age_diff != -1:
+    if age_diff != None:
         s = [id, name, str(age_diff)]
         us27List.append(list(s))
     return us27List
@@ -688,21 +680,23 @@ def _us42(gyear, gmonth, gdate):
 def _us42print():
     
     for x in us42List:
-        if x[1] == 0:
-            print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Birth", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-        if x[1] == 1:
-            print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Death", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-        if x[1] == 2:
-            if str(x[0][1]) == "I":
-                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-            else:
-                print("ERROR: FAMILY: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-        if x[1] == 3:
-            if str(x[0][1]) == "I":
-                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-            else:
-                print("ERROR: FAMILY: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-                
+        
+        match x[1]:
+            case 0:
+                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Birth", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+            case 1:
+                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Death", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+            case 2: 
+                if str(x[0][1]) == "I":
+                    print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+                elif str(x[0][1]) == "F":
+                    print("ERROR: FAMILY: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+            case 3: 
+                if str(x[0][1]) == "I":
+                    print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+                elif str(x[0][1]) == "F":
+                    print("ERROR: FAMILY: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+
 
 for line in f:
 
@@ -732,43 +726,40 @@ for line in f:
         fullStr = ' '.join(str(i) for i in strList)
 
         if (tok0 == 1) and (tok1 in tag1):
-
-            if tok1 == "NAME":
-                tblx_name = fullStr
-            if tok1 == "DIV":
-                divfday = 1
-            if tok1 == "BIRT":
-                birfday = 1
-            if tok1 == "DEAT":
-                deafday = 1
-            if tok1 == "MARR":
-                marfday = 1
-            if tok1 == "SEX":
-                tblx_gend = fullStr
-            if tok1 == "FAMC":
-                tblx_carr.append(fullStr)
-                tblx_chil = tblx_carr
-            if tok1 == "FAMS":
-                tblx_sarr.append(fullStr)
-                tblx_spou = tblx_sarr
-            if tok1 == "CHIL":
-                tbly_carr.append(fullStr)
-                tbly_chil = tbly_carr
-                #old_val = fam_id_kids[tbly_id]
-                #new_val = old_val + 1
-                #fam_id_kids[tbly_id] = new_val
-            if tok1 == "WIFE":
-                tbly_wifi = fullStr
-                matchName = _matchId(tbly_wifi)
-                tbly_wifn = matchName
-                tbly_sarr.append(fullStr)
-            if tok1 == "HUSB":
-                tbly_husi = fullStr
-                matchName = _matchId(tbly_husi)
-                tbly_husn = matchName
-                tbly_sarr.append(fullStr)
             
-            
+            match tok1:
+                case "NAME":
+                    tblx_name = fullStr
+                case "DIV":
+                    divfday = 1
+                case "BIRT":
+                    birfday = 1
+                case "DEAT":
+                    deafday = 1
+                case "MARR":
+                    marfday = 1
+                case "SEX":
+                    tblx_gend = fullStr
+                case "FAMC":
+                    tblx_carr.append(fullStr)
+                    tblx_chil = tblx_carr
+                case "FAMS":
+                    tblx_sarr.append(fullStr)
+                    tblx_spou = tblx_sarr
+                case "CHIL":
+                    tbly_carr.append(fullStr)
+                    tbly_chil = tbly_carr
+                case "WIFE":
+                    tbly_wifi = fullStr
+                    matchName = _matchId(tbly_wifi)
+                    tbly_wifn = matchName
+                    tbly_sarr.append(fullStr)
+                case "HUSB":
+                    tbly_husi = fullStr
+                    matchName = _matchId(tbly_husi)
+                    tbly_husn = matchName
+                    tbly_sarr.append(fullStr)
+                                
 
         # level 2 tags
         elif (tok0 == 2) and (tok1 in tag2):
