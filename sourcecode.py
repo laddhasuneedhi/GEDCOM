@@ -83,9 +83,11 @@ us06List = []
 us07ListA = []
 us07ListB = []
 us10List = []
-us36List = []
+us22List = []
+us22Rep = []
 us27List = []
 us28List = []
+us36List = []
 us42List = []
 
 
@@ -534,6 +536,19 @@ def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
     return True
 
 
+# def _us22(id):
+#     us22Rep.append(id)
+
+
+def _us22print(list):
+    
+    for x in list:
+        if x[1] == "I":
+            print("ERROR: INDIVIDUAL: US22:", x, "is not a unique ID")
+        if x[1] == "F":
+            print("ERROR: FAMILIY: US22:", x, "is not a unique ID")
+
+
 def _us28(bdate, id, l):
     bmn_to_num = abbr_to_num[bdate[1]]
 
@@ -789,8 +804,14 @@ for line in f:
 
         if tok2 in extag:
             if tok2 == "INDI":
+                
                 if tblx_id != "N/A":
-
+                    # check for unique INDI IDs
+                    if (tblx_id in us22List)  and (tblx_id not in us22Rep):
+                        us22Rep.append(tblx_id)
+                    if tblx_id not in us22List:
+                        us22List.append(tblx_id)
+                        
                     # calculate accurate ages
                     today = date.today()
                     today_split = str(today).split("-")
@@ -808,8 +829,8 @@ for line in f:
                             else:
                                 us42List.append(s)
                     elif tblx_aliv == False:
+                        dmn_to_num = abbr_to_num[death_split[1]]
                         if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
-                            dmn_to_num = abbr_to_num[death_split[1]]
                             if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
                                 tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
                             else: 
@@ -827,8 +848,8 @@ for line in f:
                             
                     # call INDI story functions here
                     if tblx_deat != "N/A":
+                        dmn_to_num = abbr_to_num[death_split[1]]
                         if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
-                            dmn_to_num = abbr_to_num[death_split[1]]
                             if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
                                 _us03(birth_split, death_split, tblx_id)
                                 _us27(birth_split, death_split, 0, tblx_id, tblx_name)
@@ -845,9 +866,6 @@ for line in f:
                                 pass
                             else:
                                 us42List.append(s)
-                        # _us03(birth_split, death_split, tblx_id)
-                        # _us27(birth_split, death_split, 0, tblx_id, tblx_name)
-                        # _us29(tblx_id, tblx_name)
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
 
@@ -868,18 +886,27 @@ for line in f:
                     tblx_aliv = True
 
                 elif tblx_id == "N/A":
-
                     tblx_id = tok1
+                    # check for unique INDI IDs
+                    # if (tblx_id in us22List) and (tblx_id not in us22Rep):
+                    #     us22Rep.append(tblx_id)
+                    # if tblx_id not in us22List:
+                    #     us22List.append(tblx_id)
                     tblx_aliv = True
 
-            if tok2 == "FAM":
-                
+            if tok2 == "FAM":            
 
                 marr_split = tbly_marr.split()
                 divo_split = tbly_divo.split()
 
                 if tbly_id != "N/A":
-
+                    
+                    # check for unique INDI IDs
+                    if (tbly_id in us22List) and (tbly_id not in us22Rep):
+                        us22Rep.append(tbly_id)
+                    if tbly_id not in us22List:
+                        us22List.append(tbly_id)
+                    
                     # call FAM story functions here
                     if tbly_divo != "N/A":
                         _us04(marr_split, divo_split, tbly_id)
@@ -909,7 +936,11 @@ for line in f:
 
                 elif tbly_id == "N/A":
                     tbly_id = tok1
-                   
+                    # check for unique INDI IDs
+                    # if (tbly_id in us22List) and (tbly_id not in us22Rep):
+                    #     us22Rep.append(tbly_id)
+                    # if tbly_id not in us22List:
+                    #     us22List.append(tbly_id)
 
         else:
             continue
@@ -922,6 +953,17 @@ marr_split = tbly_marr.split()
 divo_split = tbly_divo.split()
 bmn_to_num = abbr_to_num[birth_split[1]]
 
+# check for unique IDs
+if (tblx_id in us22List)  and (tblx_id not in us22Rep):
+    us22Rep.append(tblx_id)
+if tblx_id not in us22List:
+    us22List.append(tblx_id)
+
+if (tbly_id in us22List)  and (tbly_id not in us22Rep):
+    us22Rep.append(tbly_id)
+if tbly_id not in us22List:
+    us22List.append(tbly_id)
+
 if tblx_aliv == True:
     if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
         tblx_age = _age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
@@ -932,8 +974,8 @@ if tblx_aliv == True:
         else:
             us42List.append(s)
 elif tblx_aliv == False:
+    dmn_to_num = abbr_to_num[death_split[1]]
     if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
-        dmn_to_num = abbr_to_num[death_split[1]]
         if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
             tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
         else: 
@@ -951,8 +993,9 @@ elif tblx_aliv == False:
             
 # call ALL story functions here
 if tblx_deat != "N/A":
+    # checks if the day is valid for the month
+    dmn_to_num = abbr_to_num[death_split[1]]
     if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
-        dmn_to_num = abbr_to_num[death_split[1]]
         if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
             _us03(birth_split, death_split, tblx_id)
             _us27(birth_split, death_split, 0, tblx_id, tblx_name)
@@ -969,8 +1012,6 @@ if tblx_deat != "N/A":
             pass
         else:
             us42List.append(s)
-    # _us03(birth_split, death_split, tblx_id)
-    # _us27(birth_split, death_split, 0, tblx_id, tblx_name)
 if tblx_deat == "N/A":
     _us27(birth_split, 0, today_split, tblx_id, tblx_name)
 if tbly_divo != "N/A":
@@ -998,10 +1039,11 @@ _us06print(us06List)
 _us07Aprint(us07ListA)
 _us07bprint(us07ListB)
 _us10print(us10List)
-_us36print(us36List)
+_us22print(us22Rep)
 _us27print(us27List)
 _us28print(us28List)
 _us29print(deadList)
+_us36print(us36List)
 _us42print()
 
 f.close()
