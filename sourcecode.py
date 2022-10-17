@@ -90,6 +90,11 @@ us28List = []
 us36List = []
 us42List = []
 
+us03print = []
+us04print = []
+us22print = []
+us27print = []
+us29print = []
 
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
@@ -129,17 +134,6 @@ def _age(given_date, birthdate):
         ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
 
-def _us09(husid, wifid, chilist):
-    dad_age = kids_born[husid]
-    mom_age = kids_born[wifid]
-    dad_age = int((dad_age.split())[2])
-    mom_age = int((mom_age.split())[2])
-    for x in chilist:
-        kid_age = kids_born[x]
-        kid_age = int((kid_age.split())[2])
-        if (mom_age - kid_age) > 0 or (dad_age - kid_age) > 0:
-            return False
-    return True
 
 def _us03(bdate, ddate, id):
 
@@ -163,8 +157,9 @@ def _us03(bdate, ddate, id):
 def _us03print(list):
 
     for x in list:
-        print("ERROR: INDIVIDUAL: US03: " +
-              x[0] + ": Died " + x[2] + " before born " + x[1])
+        s = "ERROR: INDIVIDUAL: US03: " + x[0] + ": Died " + x[2] + " before born " + x[1]
+        us03print.append(s)
+    return us03print
 
 
 def _us04(mdate, vdate, id):
@@ -181,18 +176,14 @@ def _us04(mdate, vdate, id):
         marr_date = date(int(mdate[2]), mmn_to_num, int(mdate[0]))
     else:
         s = [id, 2, int(mdate[2]), mmn_to_num, int(mdate[0])]
-        if s in us42List:
-            pass
-        else:
+        if s not in us42List:
             us42List.append(s)
     
     if _us42(int(vdate[2]), vmn_to_num, int(vdate[0])):
         divo_date = date(int(vdate[2]), vmn_to_num, int(vdate[0]))
     else:
         s = [id, 3, int(vdate[2]), vmn_to_num, int(vdate[0])]
-        if s in us42List:
-            pass
-        else:
+        if s not in us42List:
             us42List.append(s)
     # find age difference
     if (marr_date != None) and (divo_date != None):
@@ -210,8 +201,87 @@ def _us04(mdate, vdate, id):
 def _us04print(list):
 
     for x in list:
-        print("ERROR: FAMILY: US04: " +
-              x[0] + ": Divorced " + x[2] + " before married " + x[1])
+        s = "ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1]
+        us04print.append(s)
+    return us04print
+
+
+def _corpseBride(sarr, marr, wifi, husi, fid):
+    # print(sarr)
+
+    gotmatch = 0
+    gotdeath = 0
+    death = "N/A"
+    lookupID = "N/A"
+    marr = marr.split()
+    age_diff = -1
+    fcopy = open(arg_1, 'r')
+
+    for line in fcopy:
+
+        matchToken = line.split()  # list of the line
+
+        if line == "\n":
+            continue  # ignore the empty lines
+
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1:
+            gotmatch = 0
+            gotdeath = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])):
+            gotmatch = 1
+            lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1):
+            gotdeath = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1):
+            death = matchToken[2:]
+            month_death = abbr_to_num[death[1]]
+            month_marr = abbr_to_num[marr_split[1]]
+            if _us42(int(marr_split[2]), month_marr, int(marr_split[0])):
+                if _us42(int(death[2]), month_death, int(death[0])):
+                    age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(death[2]), month_death, int(death[0])))
+                else:
+                    s = [lookupID, 1, int(death[2]), month_death, int(death[0])]
+                    if s in us42List:
+                        pass
+                    else:
+                        us42List.append(s)
+            else:
+                s = [lookupID, 2, int(marr_split[2]), month_marr, int(marr_split[0])]
+                if s in us42List:
+                    pass
+                else:
+                    us42List.append(s)
+            gotmatch = 0
+            gotdeath = 0
+            if age_diff >= 0:
+                if _us42(int(death[2]), month_death, int(death[0])):
+                    odeath = date(int(death[2]), month_death, int(death[0]))
+                else:
+                    s = [lookupID, 1, int(death[2]), month_death, int(death[0])]
+                    if s in us42List:
+                        pass
+                    else:
+                        us42List.append(s)
+                # odeath = date(int(death[2]), month_death, int(death[0]))
+                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
+                if lookupID == wifi:
+                    s_type = "wife"
+                if lookupID == husi:
+                    s_type = "husband"
+                us05List.append(
+                    [lookupID, str(odeath), str(marr_formatted), s_type, fid])
+                # return us05List
+            # else: gotmatch = 0; gotdeath = 0
+
+    fcopy.close()
+    return us05List
+
+
+def _us05print(list):
+
+    for x in list:
+        print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2], "after", x[3] + "'s (" + x[0] + ") death on", x[1])
+        
 
 def _us06(sarr, div, wifi, husi, fid):
     # print(sarr)
@@ -331,91 +401,17 @@ def _us07bprint(list):
               x[0] + " Current Date should be less than 150 years after birth")
 
 
-#this was implemented by Suneedhi Laddha and Hao Dian Li
-def _us15(fam_id, list_of_kids):
-    if len(list_of_kids) > 15:
-        print("for fam:", fam_id, "children is greater than 15")
-        return False
-    else:
-        return True
-
-
-def _corpseBride(sarr, marr, wifi, husi, fid):
-    # print(sarr)
-
-    gotmatch = 0
-    gotdeath = 0
-    death = "N/A"
-    lookupID = "N/A"
-    marr = marr.split()
-    age_diff = -1
-    fcopy = open(arg_1, 'r')
-
-    for line in fcopy:
-
-        matchToken = line.split()  # list of the line
-
-        if line == "\n":
-            continue  # ignore the empty lines
-
-        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1:
-            gotmatch = 0
-            gotdeath = 0
-        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])):
-            gotmatch = 1
-            lookupID = matchToken[1]
-        if (int(matchToken[0]) == 1) and (matchToken[1] == "DEAT") and (gotmatch == 1):
-            gotdeath = 1
-        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotdeath == 1):
-            death = matchToken[2:]
-            month_death = abbr_to_num[death[1]]
-            month_marr = abbr_to_num[marr_split[1]]
-            if _us42(int(marr_split[2]), month_marr, int(marr_split[0])):
-                if _us42(int(death[2]), month_death, int(death[0])):
-                    age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(death[2]), month_death, int(death[0])))
-                else:
-                    s = [lookupID, 1, int(death[2]), month_death, int(death[0])]
-                    if s in us42List:
-                        pass
-                    else:
-                        us42List.append(s)
-            else:
-                s = [lookupID, 2, int(marr_split[2]), month_marr, int(marr_split[0])]
-                if s in us42List:
-                    pass
-                else:
-                    us42List.append(s)
-            gotmatch = 0
-            gotdeath = 0
-            if age_diff >= 0:
-                if _us42(int(death[2]), month_death, int(death[0])):
-                    odeath = date(int(death[2]), month_death, int(death[0]))
-                else:
-                    s = [lookupID, 1, int(death[2]), month_death, int(death[0])]
-                    if s in us42List:
-                        pass
-                    else:
-                        us42List.append(s)
-                # odeath = date(int(death[2]), month_death, int(death[0]))
-                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
-                if lookupID == wifi:
-                    s_type = "wife"
-                if lookupID == husi:
-                    s_type = "husband"
-                us05List.append(
-                    [lookupID, str(odeath), str(marr_formatted), s_type, fid])
-                # return us05List
-            # else: gotmatch = 0; gotdeath = 0
-
-    fcopy.close()
-    return us05List
-
-
-def _us05print(list):
-
-    for x in list:
-        print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2],
-              "after", x[3] + "'s (" + x[0] + ") death on", x[1])
+def _us09(husid, wifid, chilist):
+    dad_age = kids_born[husid]
+    mom_age = kids_born[wifid]
+    dad_age = int((dad_age.split())[2])
+    mom_age = int((mom_age.split())[2])
+    for x in chilist:
+        kid_age = kids_born[x]
+        kid_age = int((kid_age.split())[2])
+        if (mom_age - kid_age) > 0 or (dad_age - kid_age) > 0:
+            return False
+    return True
 
 
 def _us10(sarr, marr, wifi, husi, fid):
@@ -537,59 +533,25 @@ def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
     return True
 
 
+#this was implemented by Suneedhi Laddha and Hao Dian Li
+def _us15(fam_id, list_of_kids):
+    if len(list_of_kids) > 15:
+        print("for fam:", fam_id, "children is greater than 15")
+        return False
+    else:
+        return True
+
+
 def _us22print(list):
     
     for x in list:
         if x[1] == "I":
-            print("ERROR: INDIVIDUAL: US22:", x, "is not a unique ID")
+            s = "ERROR: INDIVIDUAL: US22:", x, "is not a unique ID"
+            us22print.append(s)
         if x[1] == "F":
-            print("ERROR: FAMILIY: US22:", x, "is not a unique ID")
-
-
-def _us28(bdate, id, l):
-    bmn_to_num = abbr_to_num[bdate[1]]
-
-    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
-
-    l = [{'@I6@:' 'Gordan Ramsley', 'birth:' '2007-3-1'},
-         {'@I7@:' 'Morgan Ramsley',  'birth:' '2008-4-1'},
-         {'@I8:' 'Rose Chang', 'birth:' '2008-3-21'},
-         {'@I9:' 'Astrid Chang', 'birth:' '2008-3-21'}]
-
-    print("ERROR: FAMILY: US28: " + l)
-
-
-def _us28print(list):
-
-    for x in list:
-        print("Error:Individual:US28:" + x[1])
-
-
-def _us36(ddate, id):
-
-    dmn_to_num = abbr_to_num[ddate[1]]
-
-    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
-
-    #current_date = date.today().isoformat()
-    days_before = (date.today()-timedelta(days=30)).isoformat()
-
-    dead_diff = _age(ddate, days_before)
-
-    if dead_diff < 30:
-
-        s = [id, str(death_date)]
-        us36List.append(list(s))
-        return us36List
-
-
-def _us36print(list):
-
-    for x in list:
-        print("ERROR: INDIVIDUAL: US36: " + x[2])
-
-    print("ERROR: INDIVIDUAL: US36: Death is more than 30 days")
-
+            s = "ERROR: FAMILIY: US22:", x, "is not a unique ID"
+            us22print.append(s)
+    return us22print
 
 def _us27(bdate, ddate, tdate, id, name):
     
@@ -647,7 +609,28 @@ def _us27(bdate, ddate, tdate, id, name):
 def _us27print(list):
     
     for x in list:
-        print("LIST: INDIVIDUAL: US27:", x[0] + ":", x[1] + ":", x[2], "years old")
+        s = "LIST: INDIVIDUAL: US27:", x[0] + ":", x[1] + ":", x[2], "years old"
+        us27print.append(s)
+    return us27print
+
+
+def _us28(bdate, id, l):
+    bmn_to_num = abbr_to_num[bdate[1]]
+
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+
+    l = [{'@I6@:' 'Gordan Ramsley', 'birth:' '2007-3-1'},
+         {'@I7@:' 'Morgan Ramsley',  'birth:' '2008-4-1'},
+         {'@I8:' 'Rose Chang', 'birth:' '2008-3-21'},
+         {'@I9:' 'Astrid Chang', 'birth:' '2008-3-21'}]
+
+    print("ERROR: FAMILY: US28: " + l)
+
+
+def _us28print(list):
+
+    for x in list:
+        print("Error:Individual:US28:" + x[1])
 
 
 def _us29(id, name):
@@ -659,7 +642,35 @@ def _us29(id, name):
 def _us29print(list):
     
     for x in list:
-        print("LIST: INDIVIDUAL: US29:", x[0] + ":", x[1])
+        s = "LIST: INDIVIDUAL: US29:", x[0] + ":", x[1]
+        us29print.append(s)
+    return us29print
+
+
+def _us36(ddate, id):
+
+    dmn_to_num = abbr_to_num[ddate[1]]
+
+    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
+
+    #current_date = date.today().isoformat()
+    days_before = (date.today()-timedelta(days=30)).isoformat()
+
+    dead_diff = _age(ddate, days_before)
+
+    if dead_diff < 30:
+
+        s = [id, str(death_date)]
+        us36List.append(list(s))
+        return us36List
+
+
+def _us36print(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US36: " + x[2])
+
+    print("ERROR: INDIVIDUAL: US36: Death is more than 30 days")
 
 
 def _us42(gyear, gmonth, gdate):
@@ -1009,17 +1020,35 @@ print("Families")
 print(y.get_string(sortby="ID"))
 
 print("\n")
+
 _us03print(us03List)
+for x in us03print: 
+    print(x)
+    
 _us04print(us04List)
+for x in us04print:
+    print(x)
+
 _us05print(us05List)
 _us06print(us06List)
 _us07Aprint(us07ListA)
 _us07bprint(us07ListB)
 _us10print(us10List)
+
 _us22print(us22Rep)
+for x in us22print:
+    print(*x)  
+
 _us27print(us27List)
+for x in us27print:
+    print(*x)
+
 _us28print(us28List)
+
 _us29print(deadList)
+for x in us29print:
+    print(*x)
+
 _us36print(us36List)
 _us42print()
 
