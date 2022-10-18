@@ -214,10 +214,10 @@ def cousin_list(spouse_id, compare_id, sib_list,chil_list):
 
 def _us20(wife_id, husb_id, sib_list, chil_list):
    if (cousin_list(husb_id, wife_id, sib_list,chil_list)) or (cousin_list(wife_id, husb_id, sib_list, chil_list)):
-          s = 0
+          s = "Error US_20:" + str(husb_id) + " " + wife_id + "are cousins"
           return s
    else:
-        s = 1
+        s = "Permittable"
         return s
 
 
@@ -234,10 +234,10 @@ def _us04print(list):
 
 def _us21(role_token, role_id,gender_dict):
     if ((role_token == "HUSB" and gender_dict[role_id] != "M") or (role_token == "WIFE" and gender_dict[role_id] != "F")):
-        s = 0
+        s = "Error US_21: " + str(role_id) + "gender role does not match" 
         return s
     else:
-        s = 1
+        s = "Valid"
         return s
 
         
