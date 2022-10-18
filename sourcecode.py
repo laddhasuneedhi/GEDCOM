@@ -2,6 +2,7 @@
 # https://github.com/laddhasuneedhi/Project02.git
 # Hao Dian Li, Suneedhi Laddha, Ali El Sayed, Gigi Luna
 
+from re import L
 import sys
 from prettytable import PrettyTable
 from datetime import date, timedelta
@@ -15,6 +16,7 @@ tag2 = ["DATE"]
 extag = ["INDI", "FAM"]
 singletag = ["BIRT", "MARR", "DIV"]
 validlevels = ["0", "1", "2"]
+gender_dict = {}
 
 # if len(sys.argv) == 1:
 # 	print ("\nPlease provide input filename as the first argument and try again.\n")
@@ -35,6 +37,7 @@ x.field_names = ["ID", "Name", "Gender", "Birthday",
 y.field_names = ["ID", "Married", "Divorced", "Husband ID",
                  "Husband Name", "Wife ID", "Wife Name", "Children"]
 kids_born = {}
+sibiling_stuff = {}
 birfday = 0
 deafday = 0
 todays_date = date.today()
@@ -89,24 +92,19 @@ us27List = []
 us28List = []
 us36List = []
 us42List = []
-us18List = []
-us35List = []
 
 us03print = []
 us04print = []
 us22print = []
 us27print = []
 us29print = []
-
-
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
-abbr_to_strMonth = {'1': 'JAN', '2': 'FEB', '3': 'MAR', '4': 'APR', '5': 'MAY',
-                    '6': 'JUN', '7': 'JUL', '8': 'AUG', '9': 'SEP', '10': 'OCT', '11': 'NOV', '12': 'DEC'}
+abbr_to_strMonth = {'1' : 'JAN', '2' : 'FEB', '3' : 'MAR', '4' : 'APR', '5':'MAY', '6':'JUN'
+,'7' : 'JUL','8' : 'AUG','9' : 'SEP','10' : 'OCT','11' : 'NOV','12' : 'DEC'}
 
 # helper functions
-
 
 def _matchId(id):
 
@@ -161,14 +159,14 @@ def _us03(bdate, ddate, id):
 def _us03print(list):
 
     for x in list:
-        s = "ERROR: INDIVIDUAL: US03: " + \
-            x[0] + ": Died " + x[2] + " before born " + x[1]
+        s = "ERROR: INDIVIDUAL: US03: " + x[0] + ": Died " + x[2] + " before born " + x[1]
         us03print.append(s)
     return us03print
 
 
-def _us04(mdate, vdate, id):
 
+def _us04(mdate, vdate, id):
+    
     marr_date = None
     divo_date = None
     year_status = False
@@ -183,7 +181,7 @@ def _us04(mdate, vdate, id):
         s = [id, 2, int(mdate[2]), mmn_to_num, int(mdate[0])]
         if s not in us42List:
             us42List.append(s)
-
+    
     if _us42(int(vdate[2]), vmn_to_num, int(vdate[0])):
         divo_date = date(int(vdate[2]), vmn_to_num, int(vdate[0]))
     else:
@@ -201,15 +199,50 @@ def _us04(mdate, vdate, id):
         s = [id, str(marr_date), str(divo_date)]
         us04List.append(list(s))
         return us04List
+def cousin_list(spouse_id, compare_id, sib_list,chil_list):
+    is_in_sib = False
+    for i in sib_list.keys():
+        if i == spouse_id:
+            is_in_sib =True
+    if is_in_sib:
+          for i in sib_list[spouse_id]:
+             if compare_id in chil_list[i]:
+                return True
+  
+    return False
+
+
+def _us20(wife_id, husb_id, sib_list, chil_list):
+   if (cousin_list(husb_id, wife_id, sib_list,chil_list)) or (cousin_list(wife_id, husb_id, sib_list, chil_list)):
+          s = 0
+          return s
+   else:
+        s = 1
+        return s
+
+
+     
+   
 
 
 def _us04print(list):
 
     for x in list:
-        s = "ERROR: FAMILY: US04: " + \
-            x[0] + ": Divorced " + x[2] + " before married " + x[1]
+        s = "ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1]
         us04print.append(s)
     return us04print
+
+def _us21(role_token, role_id,gender_dict):
+    if ((role_token == "HUSB" and gender_dict[role_id] != "M") or (role_token == "WIFE" and gender_dict[role_id] != "F")):
+        s = 0
+        return s
+    else:
+        s = 1
+        return s
+
+        
+       
+
 
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
@@ -244,18 +277,15 @@ def _corpseBride(sarr, marr, wifi, husi, fid):
             month_marr = abbr_to_num[marr_split[1]]
             if _us42(int(marr_split[2]), month_marr, int(marr_split[0])):
                 if _us42(int(death[2]), month_death, int(death[0])):
-                    age_diff = _age(date(int(marr_split[2]), month_marr, int(
-                        marr_split[0])), date(int(death[2]), month_death, int(death[0])))
+                    age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(death[2]), month_death, int(death[0])))
                 else:
-                    s = [lookupID, 1, int(death[2]),
-                         month_death, int(death[0])]
+                    s = [lookupID, 1, int(death[2]), month_death, int(death[0])]
                     if s in us42List:
                         pass
                     else:
                         us42List.append(s)
             else:
-                s = [lookupID, 2, int(marr_split[2]),
-                     month_marr, int(marr_split[0])]
+                s = [lookupID, 2, int(marr_split[2]), month_marr, int(marr_split[0])]
                 if s in us42List:
                     pass
                 else:
@@ -266,8 +296,7 @@ def _corpseBride(sarr, marr, wifi, husi, fid):
                 if _us42(int(death[2]), month_death, int(death[0])):
                     odeath = date(int(death[2]), month_death, int(death[0]))
                 else:
-                    s = [lookupID, 1, int(death[2]),
-                         month_death, int(death[0])]
+                    s = [lookupID, 1, int(death[2]), month_death, int(death[0])]
                     if s in us42List:
                         pass
                     else:
@@ -290,9 +319,8 @@ def _corpseBride(sarr, marr, wifi, husi, fid):
 def _us05print(list):
 
     for x in list:
-        print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2],
-              "after", x[3] + "'s (" + x[0] + ") death on", x[1])
-
+        print("ERROR: FAMILY: US05:", x[4] + ": Married", x[2], "after", x[3] + "'s (" + x[0] + ") death on", x[1])
+        
 
 def _us06(sarr, div, wifi, husi, fid):
     # print(sarr)
@@ -326,14 +354,12 @@ def _us06(sarr, div, wifi, husi, fid):
             month_div = abbr_to_num[divo_split[1]]
             if _us42(int(divo_split[2]), month_div, int(divo_split[0])):
                 if _us42(int(death[2]), month_death, int(death[0])):
-                    age_diff = _age(date(int(divo_split[2]), month_div, int(divo_split[0])), date(
-                        int(death[2]), month_death, int(death[0])))
-                else:
+                    age_diff = _age(date(int(divo_split[2]), month_div, int(divo_split[0])), date(int(death[2]), month_death, int(death[0])))
+                else: 
                     s = [fid, 2, int(death[2]), month_death, int(death[0])]
                     if s in us42List:
                         pass
-                    else:
-                        us42List.append(s)
+                    else: us42List.append(s)
             else:
                 s = [fid, 3, int(divo_split[2]), month_div, int(divo_split[0])]
                 if s in us42List:
@@ -459,18 +485,15 @@ def _us10(sarr, marr, wifi, husi, fid):
             month_marr = abbr_to_num[marr_split[1]]
             if _us42(int(marr_split[2]), month_marr, int(marr_split[0])):
                 if _us42(int(birth[2]), month_birth, int(birth[0])):
-                    age_diff = _age(date(int(marr_split[2]), month_marr, int(
-                        marr_split[0])), date(int(birth[2]), month_birth, int(birth[0])))
+                    age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(birth[2]), month_birth, int(birth[0])))
                 else:
-                    s = [lookupID, 0, int(birth[2]),
-                         month_birth, int(birth[0])]
+                    s = [lookupID, 0, int(birth[2]), month_birth, int(birth[0])]
                     if s in us42List:
                         pass
                     else:
                         us42List.append(s)
             else:
-                s = [lookupID, 2, int(marr_split[2]),
-                     month_marr, int(marr_split[0])]
+                s = [lookupID, 2, int(marr_split[2]), month_marr, int(marr_split[0])]
                 if s in us42List:
                     pass
                 else:
@@ -549,7 +572,7 @@ def _us12(mm_id, mother_birth, dd_id, father_birth, children_birth):
     return True
 
 
-# this was implemented by Suneedhi Laddha and Hao Dian Li
+#this was implemented by Suneedhi Laddha and Hao Dian Li
 def _us15(fam_id, list_of_kids):
     if len(list_of_kids) > 15:
         print("for fam:", fam_id, "children is greater than 15")
@@ -559,7 +582,7 @@ def _us15(fam_id, list_of_kids):
 
 
 def _us22print(list):
-
+    
     for x in list:
         if x[1] == "I":
             s = "ERROR: INDIVIDUAL: US22:", x, "is not a unique ID"
@@ -569,14 +592,13 @@ def _us22print(list):
             us22print.append(s)
     return us22print
 
-
 def _us27(bdate, ddate, tdate, id, name):
-
+    
     birth_date = None
     given_date = None
     age_diff = None
     bmn_to_num = abbr_to_num[bdate[1]]
-
+    
     if tdate == 0:
         # converts month name to a number
         dmn_to_num = abbr_to_num[ddate[1]]
@@ -593,10 +615,10 @@ def _us27(bdate, ddate, tdate, id, name):
             s = [id, 0, int(ddate[2]), dmn_to_num, int(ddate[0])]
             if s not in us42List:
                 us42List.append(s)
-
-        if (birth_date != None) and (given_date != None):
+        
+        if (birth_date != None) and (given_date != None): 
             age_diff = _age(given_date, birth_date)
-
+        
     elif ddate == 0:
         # yyyy-mm-dd format
         if _us42(int(bdate[2]), bmn_to_num, int(bdate[0])):
@@ -613,10 +635,10 @@ def _us27(bdate, ddate, tdate, id, name):
                 us42List.append(s)
         # birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
         # given_date = date(int(tdate[0]), int(tdate[1]), int(tdate[2]))
-
-        if (birth_date != None) and (given_date != None):
+        
+        if (birth_date != None) and (given_date != None): 
             age_diff = _age(given_date, birth_date)
-
+    
     if age_diff != None:
         s = [id, name, str(age_diff)]
         us27List.append(list(s))
@@ -624,10 +646,9 @@ def _us27(bdate, ddate, tdate, id, name):
 
 
 def _us27print(list):
-
+    
     for x in list:
-        s = "LIST: INDIVIDUAL: US27:", x[0] + \
-            ":", x[1] + ":", x[2], "years old"
+        s = "LIST: INDIVIDUAL: US27:", x[0] + ":", x[1] + ":", x[2], "years old"
         us27print.append(s)
     return us27print
 
@@ -652,28 +673,29 @@ def _us28print(list):
 
 
 def _us29(id, name):
-
+    
     s = [id, name]
     deadList.append(s)
 
 
 def _us29print(list):
-
+    
     for x in list:
         s = "LIST: INDIVIDUAL: US29:", x[0] + ":", x[1]
         us29print.append(s)
     return us29print
 
 
-def _us36(tdate, ddate, id):
+def _us36(ddate, id):
 
     dmn_to_num = abbr_to_num[ddate[1]]
-    tmn_to_num = abbr_to_num[abbr_to_strMonth[tdate[1]]]
 
     death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
-    todaydate = date(int(tdate[0]), tmn_to_num, int(tdate[2]))
 
-    dead_diff = _age(todaydate, death_date)
+    #current_date = date.today().isoformat()
+    days_before = (date.today()-timedelta(days=30)).isoformat()
+
+    dead_diff = _age(ddate, days_before)
 
     if dead_diff < 30:
 
@@ -685,74 +707,15 @@ def _us36(tdate, ddate, id):
 def _us36print(list):
 
     for x in list:
-        print("ERROR: INDIVIDUAL: US36: " +
-              x[0] + "Death is less than 30 days")
+        print("ERROR: INDIVIDUAL: US36: " + x[2])
 
-
-def _us18(fam_id, husi, wifi):
-
-    gotmatch = 0
-    lookupID = "N/A"
-    marr = marr.split()
-    fcopy = open(arg_1, 'r')
-
-    for line in fcopy:
-
-        matchToken = line.split()  # list of the line
-
-        if line == "\n":
-            continue  # ignore the empty lines
-
-        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1:
-            gotmatch = 0
-            gotdeath = 0
-        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])):
-            gotmatch = 1
-            lookupID = matchToken[1]
-            month_marr = abbr_to_num[marr_split[1]]
-            gotmatch = 0
-
-        if lookupID == wifi:
-            s_type = "wife"
-        if lookupID == husi:
-            s_type = "husband"
-    fcopy.close()
-    return us18List
-
-
-def _us18print(list):
-
-    for x in list:
-        print("ERROR: FAMILY: US18:  ", x[4] +
-              "married", x[2], "not siblings")
-
-
-def _us35(tdate, bdate, id):
-
-    bmn_to_num = abbr_to_num[bdate[1]]
-    tmn_to_num = abbr_to_num[abbr_to_strMonth[tdate[1]]]
-
-    birfday = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
-    todaydate = date(int(tdate[0]), tmn_to_num, int(tdate[2]))
-
-    birf_diff = _age(todaydate, birfday)
-
-    if birf_diff < 30:
-        s = [id, str(birfday)]
-        us35List.append(list(s))
-        return us35List
-
-
-def _us35print(list):
-    for x in list:
-        print("ERROR: INDIVIDUAL: US35: " +
-              x[0] + "birthday is less than  30 days")
+    print("ERROR: INDIVIDUAL: US36: Death is more than 30 days")
 
 
 def _us42(gyear, gmonth, gdate):
-
+    
     result = True
-
+    
     while True:
         try:
             date(gyear, gmonth, gdate)
@@ -765,30 +728,24 @@ def _us42(gyear, gmonth, gdate):
 
 
 def _us42print():
-
+    
     for x in us42List:
-
+        
         match x[1]:
             case 0:
-                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Birth", str(x[2]) + "-" + str(
-                    x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Birth", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
             case 1:
-                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Death", str(x[2]) + "-" + str(
-                    x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-            case 2:
+                print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Death", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+            case 2: 
                 if str(x[0][1]) == "I":
-                    print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(
-                        x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+                    print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
                 elif str(x[0][1]) == "F":
-                    print("ERROR: FAMILY: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(
-                        x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
-            case 3:
+                    print("ERROR: FAMILY: US42:", str(x[0]) + ": Marriage", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+            case 3: 
                 if str(x[0][1]) == "I":
-                    print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(
-                        x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+                    print("ERROR: INDIVIDUAL: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
                 elif str(x[0][1]) == "F":
-                    print("ERROR: FAMILY: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(
-                        x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+                    print("ERROR: FAMILY: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
 
 
 for line in f:
@@ -819,7 +776,7 @@ for line in f:
         fullStr = ' '.join(str(i) for i in strList)
 
         if (tok0 == 1) and (tok1 in tag1):
-
+            
             match tok1:
                 case "NAME":
                     tblx_name = fullStr
@@ -833,6 +790,7 @@ for line in f:
                     marfday = 1
                 case "SEX":
                     tblx_gend = fullStr
+                    gender_dict[tblx_id] = tblx_age
                 case "FAMC":
                     tblx_carr.append(fullStr)
                     tblx_chil = tblx_carr
@@ -852,6 +810,7 @@ for line in f:
                     matchName = _matchId(tbly_husi)
                     tbly_husn = matchName
                     tbly_sarr.append(fullStr)
+                                
 
         # level 2 tags
         elif (tok0 == 2) and (tok1 in tag2):
@@ -883,14 +842,14 @@ for line in f:
 
         if tok2 in extag:
             if tok2 == "INDI":
-
+                
                 if tblx_id != "N/A":
                     # check for unique INDI IDs
-                    if (tblx_id in us22List) and (tblx_id not in us22Rep):
+                    if (tblx_id in us22List)  and (tblx_id not in us22Rep):
                         us22Rep.append(tblx_id)
                     if tblx_id not in us22List:
                         us22List.append(tblx_id)
-
+                        
                     # calculate accurate ages
                     today = date.today()
                     today_split = str(today).split("-")
@@ -899,58 +858,48 @@ for line in f:
                     # convert month name to number  ex: May -> 5
                     bmn_to_num = abbr_to_num[birth_split[1]]
                     if tblx_aliv == True:
-                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])):
-                            tblx_age = _age(today, date(
-                                int(birth_split[2]), bmn_to_num, int(birth_split[0])))
-                        else:
-                            s = [tblx_id, 0, int(
-                                birth_split[2]), bmn_to_num, int(birth_split[0])]
+                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
+                            tblx_age = _age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+                        else: 
+                            s = [tblx_id, 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
                             if s in us42List:
                                 pass
                             else:
                                 us42List.append(s)
                     elif tblx_aliv == False:
                         dmn_to_num = abbr_to_num[death_split[1]]
-                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])):
+                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
                             if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
-                                tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(
-                                    int(birth_split[2]), bmn_to_num, int(birth_split[0])))
-                            else:
-                                s = [tblx_id, 1, int(
-                                    death_split[2]), dmn_to_num, int(death_split[0])]
+                                tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+                            else: 
+                                s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
                                 if s in us42List:
                                     pass
                                 else:
                                     us42List.append(s)
-                        else:
-                            s = [tblx_id, 0, int(
-                                birth_split[2]), bmn_to_num, int(birth_split[0])]
+                        else: 
+                            s = [tblx_id , 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
                             if s in us42List:
                                 pass
                             else:
                                 us42List.append(s)
-
+                            
                     # call INDI story functions here
                     if tblx_deat != "N/A":
                         dmn_to_num = abbr_to_num[death_split[1]]
-                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])):
+                        if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
                             if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
                                 _us03(birth_split, death_split, tblx_id)
-                                _us27(birth_split, death_split,
-                                      0, tblx_id, tblx_name)
+                                _us27(birth_split, death_split, 0, tblx_id, tblx_name)
                                 _us29(tblx_id, tblx_name)
-                                _us36(today_split, death_split, tblx_id)
-                                _us35(today_split, birth_split,  tblx_id)
-                            else:
-                                s = [tblx_id, 1, int(
-                                    death_split[2]), dmn_to_num, int(death_split[0])]
+                            else: 
+                                s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
                                 if s in us42List:
                                     pass
                                 else:
                                     us42List.append(s)
-                        else:
-                            s = [tblx_id, 0, int(
-                                birth_split[2]), bmn_to_num, int(birth_split[0])]
+                        else: 
+                            s = [tblx_id , 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
                             if s in us42List:
                                 pass
                             else:
@@ -978,24 +927,23 @@ for line in f:
                     tblx_id = tok1
                     tblx_aliv = True
 
-            if tok2 == "FAM":
+            if tok2 == "FAM":            
 
                 marr_split = tbly_marr.split()
                 divo_split = tbly_divo.split()
 
                 if tbly_id != "N/A":
-
+                    
                     # check for unique INDI IDs
                     if (tbly_id in us22List) and (tbly_id not in us22Rep):
                         us22Rep.append(tbly_id)
                     if tbly_id not in us22List:
                         us22List.append(tbly_id)
-
+                    
                     # call FAM story functions here
                     if tbly_divo != "N/A":
                         _us04(marr_split, divo_split, tbly_id)
-                        _us06(tbly_sarr, tbly_divo,
-                              tbly_wifi, tbly_husi, tbly_id)
+                        _us06(tbly_sarr, tbly_divo, tbly_wifi, tbly_husi, tbly_id)
                     if tbly_marr != "N/A":
                         _corpseBride(tbly_sarr, tbly_marr,
                                      tbly_wifi, tbly_husi, tbly_id)
@@ -1004,9 +952,10 @@ for line in f:
 
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
                               tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
-                   # _us09(tbly_id,tbly_carr)
-                    # print(tbly_carr)
-
+                    
+                   #_us09(tbly_id,tbly_carr)
+                    #print(tbly_carr)
+                   
                     tbly_id = "N/A"
                     tbly_marr = "N/A"
                     tbly_divo = "N/A"
@@ -1034,21 +983,20 @@ divo_split = tbly_divo.split()
 bmn_to_num = abbr_to_num[birth_split[1]]
 
 # check for unique IDs
-if (tblx_id in us22List) and (tblx_id not in us22Rep):
+if (tblx_id in us22List)  and (tblx_id not in us22Rep):
     us22Rep.append(tblx_id)
 if tblx_id not in us22List:
     us22List.append(tblx_id)
 
-if (tbly_id in us22List) and (tbly_id not in us22Rep):
+if (tbly_id in us22List)  and (tbly_id not in us22Rep):
     us22Rep.append(tbly_id)
 if tbly_id not in us22List:
     us22List.append(tbly_id)
 
 if tblx_aliv == True:
-    if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])):
-        tblx_age = _age(today, date(
-            int(birth_split[2]), bmn_to_num, int(birth_split[0])))
-    else:
+    if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
+        tblx_age = _age(today, date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+    else: 
         s = [tblx_id, 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
         if s in us42List:
             pass
@@ -1056,44 +1004,39 @@ if tblx_aliv == True:
             us42List.append(s)
 elif tblx_aliv == False:
     dmn_to_num = abbr_to_num[death_split[1]]
-    if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])):
+    if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
         if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
-            tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(
-                int(birth_split[2]), bmn_to_num, int(birth_split[0])))
-        else:
-            s = [tblx_id, 1, int(death_split[2]),
-                 dmn_to_num, int(death_split[0])]
+            tblx_age = _age(date(int(death_split[2]), dmn_to_num, int(death_split[0])), date(int(birth_split[2]), bmn_to_num, int(birth_split[0])))
+        else: 
+            s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
             if s in us42List:
                 pass
             else:
                 us42List.append(s)
-    else:
-        s = [tblx_id, 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
+    else: 
+        s = [tblx_id , 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
         if s in us42List:
             pass
         else:
             us42List.append(s)
-
+            
 # call ALL story functions here
 if tblx_deat != "N/A":
     # checks if the day is valid for the month
     dmn_to_num = abbr_to_num[death_split[1]]
-    if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])):
+    if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
         if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
             _us03(birth_split, death_split, tblx_id)
             _us27(birth_split, death_split, 0, tblx_id, tblx_name)
             _us29(tblx_id, tblx_name)
-            _us36(today_split,  death_split, tblx_id)
-            _us35(today_split, birth_split, tblx_id)
-        else:
-            s = [tblx_id, 1, int(death_split[2]),
-                 dmn_to_num, int(death_split[0])]
+        else: 
+            s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
             if s in us42List:
                 pass
             else:
                 us42List.append(s)
-    else:
-        s = [tblx_id, 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
+    else: 
+        s = [tblx_id , 0, int(birth_split[2]), bmn_to_num, int(birth_split[0])]
         if s in us42List:
             pass
         else:
@@ -1109,6 +1052,7 @@ if tbly_marr != "N/A":
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age,
           tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 _us15(tbly_id, tbly_chil)
+
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
           tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
 
@@ -1120,9 +1064,9 @@ print(y.get_string(sortby="ID"))
 print("\n")
 
 _us03print(us03List)
-for x in us03print:
+for x in us03print: 
     print(x)
-
+    
 _us04print(us04List)
 for x in us04print:
     print(x)
@@ -1135,7 +1079,7 @@ _us10print(us10List)
 
 _us22print(us22Rep)
 for x in us22print:
-    print(*x)
+    print(*x)  
 
 _us27print(us27List)
 for x in us27print:
@@ -1149,9 +1093,5 @@ for x in us29print:
 
 _us36print(us36List)
 _us42print()
-
-_us18print(us18List)
-_us35print(us35List)
-
 
 f.close()
