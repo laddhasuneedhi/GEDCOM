@@ -2,6 +2,7 @@
 # https://github.com/laddhasuneedhi/Project02.git
 # Hao Dian Li, Suneedhi Laddha, Ali El Sayed, Gigi Luna
 
+from re import L
 import sys
 from prettytable import PrettyTable
 from datetime import date, timedelta
@@ -15,6 +16,7 @@ tag2 = ["DATE"]
 extag = ["INDI", "FAM"]
 singletag = ["BIRT", "MARR", "DIV"]
 validlevels = ["0", "1", "2"]
+gender_dict = {}
 
 # if len(sys.argv) == 1:
 # 	print ("\nPlease provide input filename as the first argument and try again.\n")
@@ -35,6 +37,7 @@ x.field_names = ["ID", "Name", "Gender", "Birthday",
 y.field_names = ["ID", "Married", "Divorced", "Husband ID",
                  "Husband Name", "Wife ID", "Wife Name", "Children"]
 kids_born = {}
+sibiling_stuff = {}
 birfday = 0
 deafday = 0
 todays_date = date.today()
@@ -95,7 +98,6 @@ us04print = []
 us22print = []
 us27print = []
 us29print = []
-
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
@@ -162,6 +164,7 @@ def _us03print(list):
     return us03print
 
 
+
 def _us04(mdate, vdate, id):
     
     marr_date = None
@@ -196,6 +199,30 @@ def _us04(mdate, vdate, id):
         s = [id, str(marr_date), str(divo_date)]
         us04List.append(list(s))
         return us04List
+def cousin_list(spouse_id, compare_id, sib_list,chil_list):
+    is_in_sib = False
+    for i in sib_list.keys():
+        if i == spouse_id:
+            is_in_sib =True
+    if is_in_sib:
+          for i in sib_list[spouse_id]:
+             if compare_id in chil_list[i]:
+                return True
+  
+    return False
+
+
+def _us20(wife_id, husb_id, sib_list, chil_list):
+   if (cousin_list(husb_id, wife_id, sib_list,chil_list)) or (cousin_list(wife_id, husb_id, sib_list, chil_list)):
+          s = 0
+          return s
+   else:
+        s = 1
+        return s
+
+
+     
+   
 
 
 def _us04print(list):
@@ -204,6 +231,18 @@ def _us04print(list):
         s = "ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1]
         us04print.append(s)
     return us04print
+
+def _us21(role_token, role_id,gender_dict):
+    if ((role_token == "HUSB" and gender_dict[role_id] != "M") or (role_token == "WIFE" and gender_dict[role_id] != "F")):
+        s = 0
+        return s
+    else:
+        s = 1
+        return s
+
+        
+       
+
 
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
@@ -751,6 +790,7 @@ for line in f:
                     marfday = 1
                 case "SEX":
                     tblx_gend = fullStr
+                    gender_dict[tblx_id] = tblx_age
                 case "FAMC":
                     tblx_carr.append(fullStr)
                     tblx_chil = tblx_carr
@@ -912,6 +952,7 @@ for line in f:
 
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
                               tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
+                    
                    #_us09(tbly_id,tbly_carr)
                     #print(tbly_carr)
                    
@@ -1011,6 +1052,7 @@ if tbly_marr != "N/A":
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age,
           tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 _us15(tbly_id, tbly_chil)
+
 y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
           tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
 
