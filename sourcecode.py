@@ -2,10 +2,9 @@
 # https://github.com/laddhasuneedhi/Project02.git
 # Hao Dian Li, Suneedhi Laddha, Ali El Sayed, Gigi Luna
 
-from re import L
 import sys
 from prettytable import PrettyTable
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 validtags = ["INDI", "NAME", "SEX", "BIRT", "DEAT", "FAMC", "FAMS", "FAM",
              "MARR", "HUSB", "WIFE", "CHIL", "DIV", "DATE", "HEAD", "TRLR", "NOTE"]
@@ -91,6 +90,8 @@ us22Rep = []
 us27List = []
 us28List = []
 us36List = []
+us38List = []
+us39List = []
 us42List = []
 
 us03print = []
@@ -98,6 +99,9 @@ us04print = []
 us22print = []
 us27print = []
 us29print = []
+us38print = []
+us39print = []
+
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
@@ -164,7 +168,6 @@ def _us03print(list):
     return us03print
 
 
-
 def _us04(mdate, vdate, id):
     
     marr_date = None
@@ -199,6 +202,8 @@ def _us04(mdate, vdate, id):
         s = [id, str(marr_date), str(divo_date)]
         us04List.append(list(s))
         return us04List
+    
+    
 def cousin_list(spouse_id, compare_id, sib_list,chil_list):
     is_in_sib = False
     for i in sib_list.keys():
@@ -221,16 +226,13 @@ def _us20(wife_id, husb_id, sib_list, chil_list):
         return s
 
 
-     
-   
-
-
 def _us04print(list):
 
     for x in list:
         s = "ERROR: FAMILY: US04: " + x[0] + ": Divorced " + x[2] + " before married " + x[1]
         us04print.append(s)
     return us04print
+
 
 def _us21(role_token, role_id,gender_dict):
     if ((role_token == "HUSB" and gender_dict[role_id] != "M") or (role_token == "WIFE" and gender_dict[role_id] != "F")):
@@ -239,10 +241,6 @@ def _us21(role_token, role_id,gender_dict):
     else:
         s = 1
         return s
-
-        
-       
-
 
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
@@ -669,7 +667,7 @@ def _us28(bdate, id, l):
 def _us28print(list):
 
     for x in list:
-        print("Error:Individual:US28:" + x[1])
+        print("Error: Individual: US28: " + x[1])
 
 
 def _us29(id, name):
@@ -710,6 +708,64 @@ def _us36print(list):
         print("ERROR: INDIVIDUAL: US36: " + x[2])
 
     print("ERROR: INDIVIDUAL: US36: Death is more than 30 days")
+
+def _us38(id, name, bdate):
+    
+    # tell team to add this before they call date() or datetime 
+    hardcoded_date = str(bdate[0]) + "-" + str(abbr_to_num[bdate[1]]) + "-" + str(bdate[2])
+    if validate(hardcoded_date) == False:
+        return
+    
+    bmn_to_num = abbr_to_num[bdate[1]]
+    d1 = date.today()
+    d2 = date(today.year, bmn_to_num, int(bdate[0]))
+    birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+    diff = (d2 - d1).days
+    
+    if (diff >= 0) and (diff <= 30):
+        s = [id, name, str(birth_date)]
+        us38List.append(s)
+        return us38List
+
+def _us38print(list):
+    
+    for x in list:
+        s = "LIST: INDIVIDUAL: US38:", x[0] + ":", x[1] + ": Birthday (" + x[2] + ") within next 30 days"
+        us38print.append(s)
+        return us38print
+
+
+def _us39(id, mdate):
+    
+    hardcoded_date = str(mdate[0]) + "-" + str(abbr_to_num[mdate[1]]) + "-" + str(mdate[2])
+    if validate(hardcoded_date) == False:
+        return
+    
+    mmn_to_num = abbr_to_num[mdate[1]]
+    d1 = date.today()
+    d2 = date(today.year, mmn_to_num, int(mdate[0]))
+    anni_date = date(int(mdate[2]), mmn_to_num, int(mdate[0]))
+    diff = (d2 - d1).days
+    
+    if (diff >= 0) and (diff <= 30):
+        s = [id, str(anni_date)]
+        us39List.append(s)
+        return us39List
+
+def _us39print(list):
+    
+    for x in list:
+        s = "LIST: FAMILY: US39:", x[0] + ": Anniversary (" + x[1] + ") within next 30 days"
+        us39print.append(s)
+        return us39print
+
+
+def validate(date_input):
+    try:
+        datetime.strptime(date_input, '%d-%m-%Y')
+    except ValueError:
+        # raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+        return False
 
 
 def _us42(gyear, gmonth, gdate):
@@ -906,6 +962,7 @@ for line in f:
                                 us42List.append(s)
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
+                        _us38(tblx_id, tblx_name, birth_split)
 
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt,
                               tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
@@ -949,6 +1006,8 @@ for line in f:
                                      tbly_wifi, tbly_husi, tbly_id)
                         _us10(tbly_sarr, tbly_marr,
                               tbly_wifi, tbly_husi, tbly_id)
+                        if tbly_divo == "N/A":
+                            _us39(tbly_id, marr_split)
 
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
                               tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
@@ -1043,11 +1102,15 @@ if tblx_deat != "N/A":
             us42List.append(s)
 if tblx_deat == "N/A":
     _us27(birth_split, 0, today_split, tblx_id, tblx_name)
+    _us38(tblx_id, tblx_name, birth_split)
+    
 if tbly_divo != "N/A":
     _us04(marr_split, divo_split, tbly_id)
 if tbly_marr != "N/A":
     _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
     _us10(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+    if tbly_divo != "N/A":
+        _us39(tbly_id, marr_split)
 
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age,
           tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
@@ -1094,4 +1157,12 @@ for x in us29print:
 _us36print(us36List)
 _us42print()
 
+_us38print(us38List)
+for x in us38print:
+    print(*x)
+
+_us39print(us39List)
+for x in us39print:
+    print(*x)
+    
 f.close()
