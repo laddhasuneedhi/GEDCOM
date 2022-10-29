@@ -17,7 +17,7 @@ extag = ["INDI", "FAM"]
 singletag = ["BIRT", "MARR", "DIV"]
 validlevels = ["0", "1", "2"]
 gender_dict = {}
-
+us21_list = []
 # if len(sys.argv) == 1:
 # 	print ("\nPlease provide input filename as the first argument and try again.\n")
 # 	quit()
@@ -100,12 +100,9 @@ us04print = []
 us22print = []
 us27print = []
 us29print = []
-<<<<<<< HEAD
-=======
 us38print = []
 us39print = []
 
->>>>>>> c7d7aa8274928954a39b674544853b83057788ba
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
 
@@ -172,10 +169,6 @@ def _us03print(list):
     return us03print
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> c7d7aa8274928954a39b674544853b83057788ba
 def _us04(mdate, vdate, id):
     
     marr_date = None
@@ -210,11 +203,8 @@ def _us04(mdate, vdate, id):
         s = [id, str(marr_date), str(divo_date)]
         us04List.append(list(s))
         return us04List
-<<<<<<< HEAD
-=======
     
     
->>>>>>> c7d7aa8274928954a39b674544853b83057788ba
 def cousin_list(spouse_id, compare_id, sib_list,chil_list):
     is_in_sib = False
     for i in sib_list.keys():
@@ -230,23 +220,11 @@ def cousin_list(spouse_id, compare_id, sib_list,chil_list):
 
 def _us20(wife_id, husb_id, sib_list, chil_list):
    if (cousin_list(husb_id, wife_id, sib_list,chil_list)) or (cousin_list(wife_id, husb_id, sib_list, chil_list)):
-<<<<<<< HEAD
-          s = "Error US_20:" + str(husb_id) + " " + wife_id + "are cousins"
-          return s
-   else:
-        s = "Permittable"
-        return s
-
-
-     
-   
-=======
           s = 0
           return s
    else:
         s = 1
         return s
->>>>>>> c7d7aa8274928954a39b674544853b83057788ba
 
 
 def _us04print(list):
@@ -259,23 +237,19 @@ def _us04print(list):
 def _us21(role_token, role_id,gender_dict):
     if ((role_token == "HUSB" and gender_dict[role_id] != "M") or (role_token == "WIFE" and gender_dict[role_id] != "F")):
         s = "Error US_21: " + str(role_id) + "gender role does not match" 
-        return s
-    else:
-        s = "Valid"
-        return s
+        us21_list.append(s)
+
+def _us21print():
+    for x in us21_list:
+        print(x)
+    
 
         
        
 
 
 
-def _us21(role_token, role_id,gender_dict):
-    if ((role_token == "HUSB" and gender_dict[role_id] != "M") or (role_token == "WIFE" and gender_dict[role_id] != "F")):
-        s = 0
-        return s
-    else:
-        s = 1
-        return s
+
 
 
 def _corpseBride(sarr, marr, wifi, husi, fid):
@@ -743,8 +717,6 @@ def _us36print(list):
         print("ERROR: INDIVIDUAL: US36: " + x[2])
 
     print("ERROR: INDIVIDUAL: US36: Death is more than 30 days")
-<<<<<<< HEAD
-=======
 
 def _us38(id, name, bdate):
     
@@ -803,7 +775,6 @@ def validate(date_input):
     except ValueError:
         # raise ValueError("Incorrect data format, should be YYYY-MM-DD")
         return False
->>>>>>> c7d7aa8274928954a39b674544853b83057788ba
 
 
 def _us42(gyear, gmonth, gdate):
@@ -884,7 +855,7 @@ for line in f:
                     marfday = 1
                 case "SEX":
                     tblx_gend = fullStr
-                    gender_dict[tblx_id] = tblx_age
+                    gender_dict[tblx_id] = tblx_gend
                 case "FAMC":
                     tblx_carr.append(fullStr)
                     tblx_chil = tblx_carr
@@ -899,11 +870,13 @@ for line in f:
                     matchName = _matchId(tbly_wifi)
                     tbly_wifn = matchName
                     tbly_sarr.append(fullStr)
+                    _us21("WIFE", tbly_wifi, gender_dict)
                 case "HUSB":
                     tbly_husi = fullStr
                     matchName = _matchId(tbly_husi)
                     tbly_husn = matchName
                     tbly_sarr.append(fullStr)
+                    _us21("HUSB", tbly_husi, gender_dict)
                                 
 
         # level 2 tags
@@ -1177,6 +1150,7 @@ _us06print(us06List)
 _us07Aprint(us07ListA)
 _us07bprint(us07ListB)
 _us10print(us10List)
+_us21print()
 
 _us22print(us22Rep)
 for x in us22print:
@@ -1195,8 +1169,6 @@ for x in us29print:
 _us36print(us36List)
 _us42print()
 
-<<<<<<< HEAD
-=======
 _us38print(us38List)
 for x in us38print:
     print(*x)
@@ -1205,5 +1177,4 @@ _us39print(us39List)
 for x in us39print:
     print(*x)
     
->>>>>>> c7d7aa8274928954a39b674544853b83057788ba
 f.close()
