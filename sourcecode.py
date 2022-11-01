@@ -80,6 +80,11 @@ us05tempdday = "N/A"
 us10tempbday = "N/A"
 us10tempmday = "N/A"
 deadList = []
+us01Lista = []
+us01Listb = []
+us01Listc = []
+us01Listd = []
+us02List =[]
 us03List = []
 us04List = []
 us05List = []
@@ -95,6 +100,12 @@ us36List = []
 us38List = []
 us39List = []
 us42List = []
+
+us01printa = []
+us01printb = []
+us01printc = []
+us01printd = []
+us02print = []
 us03print = []
 us04print = []
 us22print = []
@@ -144,6 +155,126 @@ def _age(given_date, birthdate):
     age = given_date.year - birthdate.year - \
         ((given_date.month, given_date.day) < (birthdate.month, birthdate.day))
     return age
+
+def _us01a(tdate, bdate, id):
+
+     bmn_to_num = abbr_to_num[bdate[1]]
+     tmn_to_num = abbr_to_num[abbr_to_strMonth[tdate[1]]]
+
+     birth_date = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+     todaydate = date(int(tdate[0]), tmn_to_num, int(tdate[2]))
+     
+     birth_diff = _age(todaydate, birth_date)
+
+     if birth_diff < 0:
+
+         s = [id, str(birth_date)]
+         us01Lista.append(list(s))
+         return us01Lista
+
+
+def _us01printa(list):
+
+     for x in list:
+         print("ERROR: INDIVIDUAL: US01: " +
+               x[0] + "Birth should be before today's date")
+
+
+def _us01b(tdate, ddate, id):
+
+     dmn_to_num = abbr_to_num[ddate[1]]
+     tmn_to_num = abbr_to_num[abbr_to_strMonth[tdate[1]]]
+
+     death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
+     todaydate = date(int(tdate[0]), tmn_to_num, int(tdate[2]))
+     
+     death_diff = _age(todaydate, death_date)
+
+     if death_diff < 0:
+
+         s = [id, str(death_date)]
+         us01Listb.append(list(s))
+         return us01Listb
+
+
+def _us01printb(list):
+
+     for x in list:
+         print("ERROR: INDIVIDUAL: US01: " +
+               x[0] + "Death should be before today's date")
+
+
+
+
+def _us02(sarr, marr, wifi, husi, fid):
+    # print(sarr)
+
+    age_diff = -1
+    gotmatch = 0
+    gotbirth = 0
+    birth = "N/A"
+    lookupID = "N/A"
+    marr = marr.split()
+    fcopy = open(arg_1, 'r')
+
+    for line in fcopy:
+
+        matchToken = line.split()  # list of the line
+
+        if line == "\n":
+            continue  # ignore the empty lines
+
+        if (int(matchToken[0]) == 0) and (matchToken[1] != "NOTE") and gotmatch == 1:
+            gotmatch = 0
+            gotbirth = 0
+        if (int(matchToken[0]) == 0) and ((matchToken[1] == sarr[0]) or (matchToken[1] == sarr[1])):
+            gotmatch = 1
+            lookupID = matchToken[1]
+        if (int(matchToken[0]) == 1) and (matchToken[1] == "BIRT") and (gotmatch == 1):
+            gotbirth = 1
+        if (int(matchToken[0]) == 2) and (matchToken[1] == "DATE") and (gotbirth == 1):
+            birth = matchToken[2:]
+            month_birth = abbr_to_num[birth[1]]
+            month_marr = abbr_to_num[marr_split[1]]
+            if _us42(int(marr_split[2]), month_marr, int(marr_split[0])):
+                if _us42(int(birth[2]), month_birth, int(birth[0])):
+                    age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(birth[2]), month_birth, int(birth[0])))
+                else:
+                    s = [lookupID, 0, int(birth[2]), month_birth, int(birth[0])]
+                    if s in us42List:
+                        pass
+                    else:
+                        us42List.append(s)
+            else:
+                s = [lookupID, 2, int(marr_split[2]), month_marr, int(marr_split[0])]
+                if s in us42List:
+                    pass
+                else:
+                    us42List.append(s)
+            # age_diff = _age(date(int(marr_split[2]), month_marr, int(marr_split[0])), date(int(birth[2]), month_birth, int(birth[0])))
+            gotmatch = 0
+            gotbirth = 0
+            if (age_diff != -1) and (age_diff < 0):
+                obirth = date(int(birth[2]), month_birth, int(birth[0]))
+                marr_formatted = date(int(marr[2]), month_marr, int(marr[0]))
+                if lookupID == wifi:
+                    s_type = "wife"
+                if lookupID == husi:
+                    s_type = "husband"
+                us02List.append(
+                    [lookupID, str(obirth), str(marr_formatted), s_type, fid])
+                # return us05List
+            # else: gotmatch = 0; gotdeath = 0
+
+    fcopy.close()
+    return us02List
+
+
+def _us02print(list):
+
+    for x in list:
+        print("ERROR: INDIVIDUAL: US02: " + x[0] + " Born " + x[1] + " " +
+              x[3] + " (Family: " + x[4] + ") birth has to be before marriage")
 
 
 def _us03(bdate, ddate, id):
@@ -1001,10 +1132,11 @@ for line in f:
                     if tblx_deat != "N/A":
                         dmn_to_num = abbr_to_num[death_split[1]]
                         if _us42(int(birth_split[2]), bmn_to_num, int(birth_split[0])): 
+                            _us01a(today_split, birth_split, tblx_id)
+                            _us01b(today_split, death_split, tblx_id)
                             if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
                                 _us03(birth_split, death_split, tblx_id)
                                 _us27(birth_split, death_split, 0, tblx_id, tblx_name)
-                                
                             else: 
                                 s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
                                 if s in us42List:
@@ -1020,7 +1152,9 @@ for line in f:
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
                         _us38(tblx_id, tblx_name, birth_split)
-                    id_name_dict[tblx_id] = tblx_name
+                    
+                        
+                    id_name_dict[tblx_id] = tblx_name 
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt,
                               tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
                     
@@ -1044,9 +1178,11 @@ for line in f:
 
             if tok2 == "FAM":            
 
+
                 marr_split = tbly_marr.split()
                 divo_split = tbly_divo.split()
-
+                today = date.today()
+                today_split = str(today).split("-")
                 if tbly_id != "N/A":
                     
                     # check for unique INDI IDs
@@ -1064,13 +1200,14 @@ for line in f:
                                      tbly_wifi, tbly_husi, tbly_id)
                         _us10(tbly_sarr, tbly_marr,
                               tbly_wifi, tbly_husi, tbly_id)
+                        _us02(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
                         if tbly_divo == "N/A":
                             _us39(tbly_id, marr_split)
                     _us25(tbly_id, tbly_husi, tbly_wifi, tbly_chil)
                     _us33(tbly_husi, tbly_wifi, tbly_chil)
 
-                    y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
-                              tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
+                    # y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
+                    #           tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
                     
                    #_us09(tbly_id,tbly_carr)
                     #print(tbly_carr)
@@ -1147,7 +1284,8 @@ if tblx_deat != "N/A":
         if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
             _us03(birth_split, death_split, tblx_id)
             _us27(birth_split, death_split, 0, tblx_id, tblx_name)
-            _us29(tblx_id, tblx_name)
+            _us01a(today_split, birth_split, tblx_id)
+            _us01b(today_split, death_split, tblx_id)
         else: 
             s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
             if s in us42List:
@@ -1169,6 +1307,7 @@ if tbly_divo != "N/A":
 if tbly_marr != "N/A":
     _corpseBride(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
     _us10(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
+    _us02(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
     if tbly_divo != "N/A":
         _us39(tbly_id, marr_split)
 id_name_dict[tblx_id] = tblx_name
@@ -1194,6 +1333,9 @@ _us04print(us04List)
 for x in us04print:
     print(x)
 
+_us01printa(us01Lista)
+_us01printb(us01Listb)
+_us02print(us02List)
 _us05print(us05List)
 _us06print(us06List)
 _us07Aprint(us07ListA)
