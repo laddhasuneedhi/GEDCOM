@@ -41,6 +41,7 @@ sibiling_stuff = {}
 birfday = 0
 deafday = 0
 todays_date = date.today()
+age_tracker = {}
 name_list = []
 id_list = []
 
@@ -94,14 +95,17 @@ us36List = []
 us38List = []
 us39List = []
 us42List = []
-
 us03print = []
 us04print = []
 us22print = []
+us25print = []
 us27print = []
 us29print = []
 us38print = []
 us39print = []
+us33print = []
+isdead = []
+id_name_dict = {}
 
 abbr_to_num = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5,
                'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9, 'OCT': 10, 'NOV': 11, 'DEC': 12}
@@ -203,7 +207,16 @@ def _us04(mdate, vdate, id):
         s = [id, str(marr_date), str(divo_date)]
         us04List.append(list(s))
         return us04List
+
+
+
+
+
+   
     
+
+
+
     
 def cousin_list(spouse_id, compare_id, sib_list,chil_list):
     is_in_sib = False
@@ -677,11 +690,6 @@ def _us28print(list):
 
     for x in list:
         print("Error: Individual: US28: " + x[1])
-
-
-def _us29(id, name):
-    
-    s = [id, name]
     deadList.append(s)
 
 
@@ -691,6 +699,13 @@ def _us29print(list):
         s = "LIST: INDIVIDUAL: US29:", x[0] + ":", x[1]
         us29print.append(s)
     return us29print
+
+def _us35(_id, bdate):
+    bdate = bdate.split(" ")
+    if int(bdate[2]) == 2022:
+        recent_birth_list.append(_id)
+
+
 
 
 def _us36(ddate, id):
@@ -735,6 +750,32 @@ def _us38(id, name, bdate):
         s = [id, name, str(birth_date)]
         us38List.append(s)
         return us38List
+def _us33(husi, wifi, chil):
+    if husi in isdead and wifi in isdead:
+        for x in chil:
+            s = "LIST: INDIVIDUAL: US33" + str(x)
+            us33print.append(s)
+        
+def _us25(fami , husi, wifi, chil):
+    is_there = False
+    if id_name_dict[husi].split(" ")[0] == id_name_dict[wifi].split(" ")[0]:
+        is_there = True       
+    else:
+        matching = set()
+        matching.add(id_name_dict[husi].split(" ")[0])
+        matching.add(id_name_dict[wifi].split(" ")[0])
+        for x in chil:
+            if id_name_dict[x].split(" ")[0] in matching:
+                is_there = True
+                break
+            else:
+                matching.add(id_name_dict[x].split(" ")[0])
+    print(is_there)
+    if is_there:
+        s = "Error:FAMILY:US25:" + str(fami) + "first names not unique"
+        us25print.append(s)
+
+        
 
 def _us38print(list):
     
@@ -845,6 +886,7 @@ for line in f:
             match tok1:
                 case "NAME":
                     tblx_name = fullStr
+                    
                 case "DIV":
                     divfday = 1
                 case "BIRT":
@@ -885,12 +927,16 @@ for line in f:
 
                 if birfday == 1:
                     tblx_birt = fullStr
+
+                    
                     birfday = 0
 
                 if deafday == 1:
                     tblx_deat = fullStr
+                    isdead.append(tblx_id)
                     deafday = 0
                     tblx_aliv = False
+                    
 
                 if marfday == 1:
                     tbly_marr = fullStr
@@ -958,7 +1004,7 @@ for line in f:
                             if _us42(int(death_split[2]), dmn_to_num, int(death_split[0])):
                                 _us03(birth_split, death_split, tblx_id)
                                 _us27(birth_split, death_split, 0, tblx_id, tblx_name)
-                                _us29(tblx_id, tblx_name)
+                                
                             else: 
                                 s = [tblx_id, 1, int(death_split[2]), dmn_to_num, int(death_split[0])]
                                 if s in us42List:
@@ -974,9 +1020,10 @@ for line in f:
                     if tblx_deat == "N/A":
                         _us27(birth_split, 0, today_split, tblx_id, tblx_name)
                         _us38(tblx_id, tblx_name, birth_split)
-
+                    id_name_dict[tblx_id] = tblx_name
                     x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt,
                               tblx_age, tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
+                    
                     tblx_id = "N/A"
                     tblx_name = "N/A"
                     tblx_gend = "N/A"
@@ -1019,6 +1066,8 @@ for line in f:
                               tbly_wifi, tbly_husi, tbly_id)
                         if tbly_divo == "N/A":
                             _us39(tbly_id, marr_split)
+                    _us25(tbly_id, tbly_husi, tbly_wifi, tbly_chil)
+                    _us33(tbly_husi, tbly_wifi, tbly_chil)
 
                     y.add_row([tbly_id, tbly_marr, tbly_divo, tbly_husi,
                               tbly_husn, tbly_wifi, tbly_wifn, tbly_chil])
@@ -1122,7 +1171,7 @@ if tbly_marr != "N/A":
     _us10(tbly_sarr, tbly_marr, tbly_wifi, tbly_husi, tbly_id)
     if tbly_divo != "N/A":
         _us39(tbly_id, marr_split)
-
+id_name_dict[tblx_id] = tblx_name
 x.add_row([tblx_id, tblx_name, tblx_gend, tblx_birt, tblx_age,
           tblx_aliv, tblx_deat, tblx_chil, tblx_spou])
 _us15(tbly_id, tbly_chil)
@@ -1155,7 +1204,8 @@ _us21print()
 _us22print(us22Rep)
 for x in us22print:
     print(*x)  
-
+for x in us25print:
+    print(x)
 _us27print(us27List)
 for x in us27print:
     print(*x)
@@ -1168,7 +1218,8 @@ for x in us29print:
 
 _us36print(us36List)
 _us42print()
-
+for x in us33print:
+    print(x)
 _us38print(us38List)
 for x in us38print:
     print(*x)
@@ -1176,5 +1227,5 @@ for x in us38print:
 _us39print(us39List)
 for x in us39print:
     print(*x)
-    
+
 f.close()
