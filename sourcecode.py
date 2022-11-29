@@ -104,6 +104,8 @@ us36List = []
 us38List = []
 us39List = []
 us42List = []
+us37List = []
+us31List = []
 
 us01printa = []
 us01printb = []
@@ -115,10 +117,12 @@ us04print = []
 us22print = []
 us25print = []
 us27print = []
+us28print = []
 us29print = []
 us38print = []
 us39print = []
 us33print = []
+
 isdead = []
 id_name_dict = {}
 
@@ -856,7 +860,7 @@ def _us35(tdate, bdate, id):
 
 def _us35print(list):
     for x in list:
-        print("ERROR: INDIVIDUAL: US35: " +
+        print("LIST: INDIVIDUAL: US35: " +
               x[0] + "birthday is less than  30 days")
 
 
@@ -921,7 +925,7 @@ def _us36(tdate, ddate, id):
 def _us36print(list):
 
     for x in list:
-        print("ERROR: INDIVIDUAL: US36: " +
+        print("LIST: INDIVIDUAL: US36: " +
               x[0] + "Death is less than 30 days")
 
 
@@ -1057,6 +1061,48 @@ def _us42print():
                 elif str(x[0][1]) == "F":
                     print("ERROR: FAMILY: US42:", str(x[0]) + ": Divorce", str(x[2]) + "-" + str(
                         x[3]) + "-" + str(x[4]), "does not have a valid date for the given month")
+
+
+def _us37(tdate, ddate, id):
+    dmn_to_num = abbr_to_num[ddate[1]]
+    tmn_to_num = abbr_to_num[abbr_to_strMonth[tdate[1]]]
+
+    death_date = date(int(ddate[2]), dmn_to_num, int(ddate[0]))
+    todaydate = date(int(tdate[0]), tmn_to_num, int(tdate[2]))
+
+    dead_diff = _age(todaydate, death_date)
+
+    if dead_diff < 30:
+
+        s = [id, str(death_date)]
+        us37List.append(list(s))
+        return us37List
+
+
+def _us37print(list):
+
+    for x in list:
+        print("LIST: INDIVIDUAL: US37: " +
+              x[0] + "Living relatives of deceased" + x[0])
+
+
+def _us31(id, bdate):
+    bmn_to_num = abbr_to_num[bdate[1]]
+
+    birfday = date(int(bdate[2]), bmn_to_num, int(bdate[0]))
+
+    birf_diff = _age(birfday)
+
+    if birf_diff > 30:
+        s = [id, str(birfday)]
+        us31List.append(list(s))
+        return us31List
+
+
+def _us31print(list):
+    for x in list:
+        print("LIST: INDIVIDUAL: US31: " +
+              x[0] + "NEVER BEEN MARRIED")
 
 
 for line in f:
@@ -1216,6 +1262,8 @@ for line in f:
                                       0, tblx_id, tblx_name)
                                 _us35(today_split, birth_split, tblx_id)
                                 _us36(today_split, death_split, tblx_id)
+                                _us37(today_split, death_split, tblx_id)
+                                # _us31(birth_split, tblx_id)
                             else:
                                 s = [tblx_id, 1, int(
                                     death_split[2]), dmn_to_num, int(death_split[0])]
@@ -1371,6 +1419,8 @@ if tblx_deat != "N/A":
             _us01a(today_split, birth_split, tblx_id)
             _us01b(today_split, death_split, tblx_id)
             _us36(today_split, death_split, tblx_id)
+            _us37(today_split, death_split, tblx_id)
+            _us31(birth_split, tblx_id)
 
         else:
             s = [tblx_id, 1, int(death_split[2]),
@@ -1389,6 +1439,7 @@ if tblx_deat == "N/A":
     _us27(birth_split, 0, today_split, tblx_id, tblx_name)
     _us38(tblx_id, tblx_name, birth_split)
     _us35(today_split, birth_split, tblx_id)
+    # _us31(birth_split, tblx_id)
 
 if tbly_divo != "N/A":
     _us04(marr_split, divo_split, tbly_id)
@@ -1432,10 +1483,6 @@ _us10print(us10List)
 _us21print()
 
 
-
-
-    
-
 _us22print(us22Rep)
 for x in us22print:
     print(*x)
@@ -1455,6 +1502,8 @@ _us36print(us36List)
 _us35print(us35List)
 _us18print(us18List)
 
+_us31print(us31List)
+
 _us42print()
 for x in us33print:
     print(x)
@@ -1466,7 +1515,9 @@ _us39print(us39List)
 for x in us39print:
     print(*x)
 
-#User Story 23
+_us37print(us37List)
+
+# User Story 23
 tableFor23 = x.get_string(fields=["Name", "Birthday"])
 arrayFor23 = []
 for row in tableFor23:
@@ -1477,6 +1528,7 @@ for row in tableFor23:
 
 for i in arrayFor23:
     if arrayFor23.count(i) == 2:
-        print("LIST: INDIVIDUAL: US23:" + " Two individuals contain the same name and birthday")
+        print("LIST: INDIVIDUAL: US23:" +
+              " Two individuals contain the same name and birthday")
 
 f.close()
