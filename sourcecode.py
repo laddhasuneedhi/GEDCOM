@@ -1431,6 +1431,11 @@ _us07bprint(us07ListB)
 _us10print(us10List)
 _us21print()
 
+
+
+
+    
+
 _us22print(us22Rep)
 for x in us22print:
     print(*x)
@@ -1460,5 +1465,18 @@ for x in us38print:
 _us39print(us39List)
 for x in us39print:
     print(*x)
+
+#User Story 23
+tableFor23 = x.get_string(fields=["Name", "Birthday"])
+arrayFor23 = []
+for row in tableFor23:
+    row.border = False
+    row.header = False
+    arrayFor23.append(row.get_string(fields=["Name", "Birthday"]))
+
+
+for i in arrayFor23:
+    if arrayFor23.count(i) == 2:
+        print("LIST: INDIVIDUAL: US23:" + " Two individuals contain the same name and birthday")
 
 f.close()
